@@ -1,0 +1,113 @@
+---
+title: "BCP HEI"
+output: html_notebook
+---
+
+```{r setup}
+#devtools::install_github("timfolsom/hei")
+library(hei)
+library(SASmarkdown)
+library(plyr)
+library(dplyr)
+```
+## Exploring the examples with hei
+```{r}
+dems<-get_demo("2013/2014")
+names(dems)
+head(dems)
+
+fped<-get_fped("2013/2014", "both")
+names(fped)
+
+diet<-get_diet("2013/2014", "both")
+names(diet)
+head(diet)
+```
+
+
+
+
+## Load in the data
+Intake Properties Totals File (File 04)
+Serving Count Totals File (File 09)
+```{r load_data}
+file09<-read.table("~/Google Drive/BCP/Baby ConnectoMe Datasets/October 2018 - UNC + UMN April and May 2018/Mom UNC + UMN/MomOct18d/MomOct1809.txt", sep="\t", header=T)
+
+file04<-read.table("~/Google Drive/BCP/Baby ConnectoMe Datasets/October 2018 - UNC + UMN April and May 2018/Mom UNC + UMN/MomOct18d/MomOct1804.txt", sep="\t", header=T)
+```
+
+```{r}
+data<-join(file04, file09)
+dim(data)
+
+data[,19:394]<-apply(data[,19:394], MARGIN = 2, as.numeric)
+attach(data)
+```
+```{r}
+
+```
+
+# Creating components
+```{r}
+VEG0100
+#TOTAL VEGETABLES COMPONENT
+data$hei_totveg<-(VEG0100+VEG0200+VEG0300+VEG0400+VEG0800+VEG0450+VEG0700+
+		VEG0600+VEG0900+VEG0500)/2
+```
+ref: Development and evaluation of a method for calculating the Healthy Eating Index-2005 using the Nutrition Data System for Research
+```{r}
+#GREENS AND BEANS COMPONENT
+data$hei_greensbeans<-(VEG0100+VEG0700)/2
+		
+#TOTAL FRUITS COMPONENT
+data$hei_totfruit<-(FRU0100+FRU0200+FRU0300+FRU0400+FRU0500+FRU0600+FRU0700)/2
+  
+# WHOLE FRUITS COMPONENT
+data$hei_wholefruit<-(FRU0300+FRU0400+FRU0500+FRU0600+FRU0700)/2
+		
+# WHOLE GRAINS COMPONENT
+#data$hei_wholegrains<-riwholegrains
+data$hei_wholegrains_solo<-(GRW0100+GRW0200+GRW0300+GRW0400+GRW0500+GRW0600)+((GRS0100+GRS0200+GRW0300+GRS0400+GRS0500+GRS0600)/2)
+#sweet cereal, pastries, snackbars, chips
+data$hei_sweetwholegrain<-(GRW0700+GRW0800+GRW1000+GRW0900+GRW1100+GRW1200)+((GRS0700+GRS0800+GRS1000+GRS0900)/2)
+data$hei_wholegrains_general<-data$hei_wholegrains_solo+data$hei_sweetwholegrain
+
+# DAIRY COMPONENT# INCLUDE DAIRY GROUPS ADDED IN 2019
+## missing DML0500, DYF0300 , DYR0300, DYL0300, DOT0900
+data$hei_dairy<-(DMF0100+DMR0100+DML0100+DMN0100+DMF0200+DMR0200+
+		DML0200+DML0300+DML0400+DCF0100+DCR0100+DCL0100+DCN0100+
+		DYF0100+DYR0100+DYL0100+DYF0200+DYR0200+DYL0200+DYN0100+
+		((DOT0100)/3)+DOT0300+DOT0400+DOT0500+DOT0600)
+		
+# TOTAL PROTEIN FOODS COMPONENT
+data$hei_totproteins<-(MRF0100+MRL0100+MRF0200+MRL0200+
+		MRF0300+MRL0300+MRF0400+MRL0400+MCF0200+MCL0200+MRF0500+
+		MPF0100+MPL0100+MPF0200+MFF0100+MFL0100+MFF0200+MSL0100+
+		MSF0100+MCF0100+MCL0100+MOF0100+MOF0200+MOF0300+MOF0400+
+		MOF0500+MOF0600+MOF0700+(VEG0700*2))
+
+# SEAFOOD AND PLANT PROTEINS COMPONENT
+data$hei_seafoodplantprot<-(MFF0100+
+		MFL0100+MFF0200+MSL0100+MSF0100+MOF0500+MOF0600+MOF0700+
+		(VEG0700*2))
+		
+## MODERATION
+# SODIUM COMPONENT
+data$hei_sodium <- Sodium..mg./1000
+		
+# REFINED GRAINS COMPONENT
+hei_refinedgrains<-rirefinedgrains
+#some
+
+#all
+
+# ADDED SUGARS COMPONENT
+	hei_addedsugars<-rias_ts*4 
+```
+# Notes
+## Variables not found
+DML0500 
+DYF0300 
+DYR0300
+DYL0300
+DOT0900
