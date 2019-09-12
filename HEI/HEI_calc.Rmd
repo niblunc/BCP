@@ -4,32 +4,82 @@ output: html_notebook
 ---
 
 ```{r setup}
-#devtools::install_github("timfolsom/hei")
-library(hei)
-library(SASmarkdown)
 library(plyr)
 library(dplyr)
 ```
-## Exploring the examples with hei
+
+# About the data
+Intake Properties Totals File (File 04)
+Serving Count Totals File (File 09)
+
+# Important functions
 ```{r}
-dems<-get_demo("2013/2014")
-names(dems)
-head(dems)
+adeq_check<-function(inital, new, parameter){
+  #parameters are based on the HEI 2015 from NDSR SAS HEI script
+  v5<-c(data$hei_totveg, data$hei_greensbeans, data$hei_totfruit, data$hei_wholefruit, data$hei_totproteins, data$hei_seafoodplantprot)
+  v10<-c(data$hei_wholegrains, data$hei_dairy)
+  vFA<-c(data$hei_fatacid)
+  
+  if(inital %in% v5 == TRUE){
+    print("neat")
+    init= inital/data$energy
+    
+    new	<-ifelse(init==0, 0, NA)
+    new	<-ifelse(init >= parameter, 5, NA)
+    new	<-ifelse(is.na(new), 5*(init/parameter),new)
+    
+  } else if(inital %in% v10 == TRUE){
+    print("cool")
+    init= inital/data$energy
+    
+    new	<-ifelse(init==0, 0, NA)
+    new	<-ifelse(init >= parameter, 10, NA)
+    new	<-ifelse(is.na(new), 10*(init/parameter),new)
+    
+  } 
+}
 
-fped<-get_fped("2013/2014", "both")
-names(fped)
+fa_adeq<-function(poly,mono,sat){
+  FARMIN=1.2
+  FARMAX=2.5
+  init=(poly+mono)/sat
+  new <-ifelse(init <= FARMIN, 0, NA)
+  new <-ifelse(init > FARMAX, 10, NA)
+  new	<-ifelse(is.na(new), 10*((init-FARMIN)/(FARMAX-FARMIN)),new)
+}
+```
 
-diet<-get_diet("2013/2014", "both")
-names(diet)
-head(diet)
+```{r}
+mod_check<-function(input, new, MIN, MAX){
+  v1<-c(data$hei_sodium, data$hei_refinedgrains)
+  v2<-c(data$hei_addedsugars)
+  v3<-c(data$X..Calories.from.SFA)
+  if(input %in% v1 == TRUE){
+  init=input/data$energy
+  
+  new <-ifelse(init >= MAX, 0, NA)
+  new <-ifelse(init <= MIN, 10, NA)
+  new	<-ifelse(is.na(new), 10-(10*((init-MIN)/(MAX-MIN))),new)
+  
+  }else if(input %in% v2 == TRUE){
+    print("sweet")
+    init=100*input/data$Energy..kcal.
+    
+    new <-ifelse(init >= MAX, 0, NA)
+    new <-ifelse(init < MIN, 10, NA)
+    new	<-ifelse(is.na(new), 10-(10*((init-MIN)/(MAX-MIN))),new)
+  }else if(input %in% v3 == TRUE){
+    init=input
+    
+    new <-ifelse(init > MAX, 0, NA)
+    new <-ifelse(init < MIN, 10, NA)
+    new	<-ifelse(is.na(new), 10-(10*((init-MIN)/(MAX-MIN))),new)
+  }
+}
 ```
 
 
-
-
-## Load in the data
-Intake Properties Totals File (File 04)
-Serving Count Totals File (File 09)
+# Load data
 ```{r load_data}
 file09<-read.table("~/Google Drive/BCP/Baby ConnectoMe Datasets/October 2018 - UNC + UMN April and May 2018/Mom UNC + UMN/MomOct18d/MomOct1809.txt", sep="\t", header=T)
 
@@ -40,22 +90,44 @@ file04<-read.table("~/Google Drive/BCP/Baby ConnectoMe Datasets/October 2018 - U
 data<-join(file04, file09)
 dim(data)
 
+# make the data numeric instead of factors
 data[,19:394]<-apply(data[,19:394], MARGIN = 2, as.numeric)
 attach(data)
 ```
+# Check if the data is non-zero
+deciding if I want this
 ```{r}
+data$energy=data$Energy..kcal./1000 
 
+#ifelse(data$Energy..kcal. > 0, )
+#if rikcal=0 then do;
+#  HEIX1_TOTALVEG=0; HEIX2_GREEN_AND_BEAN=0; HEIX3_TOTALFRUIT=0; HEIX4_WHOLEFRUIT=0; HEIX5_WHOLEGRAIN=0; HEIX6_TOTALDAIRY=0;
+#  HEIX7_TOTPROT=0;  HEIX8_SEAPLANT_PROT=0; HEIX9_FATTYACID=0; HEIX10_SODIUM=0; HEIX11_REFINEDGRAIN=0; HEIX12_ADDEDSUGARS=0; 
+#  HEIX13_SATFATS=0;
 ```
 
-# Creating components
+# Grouping stuff
+Need to figure out the naming convention 
+
 ```{r}
-VEG0100
+#proc means data=hei0409togroup noprint;
+#  by cpartid;
+#  var rikcal hei_totveg hei_greensbeans hei_totfruit hei_wholefruit hei_wholegrains hei_dairy hei_totproteins hei_seafoodplantprot 
+#		ripfa rimfa risfa hei_sodium hei_refinedgrains hei_addedsugars ripctsfa;
+#  output out=dailyhei0409 sum=;
+#run;
+group_data <- group_by(.data = data, data$Participant.ID)
+group_data
+```
+
+
+# Creating components
+ref: Development and evaluation of a method for calculating the Healthy Eating Index-2005 using the Nutrition Data System for Research
+```{r}
 #TOTAL VEGETABLES COMPONENT
 data$hei_totveg<-(VEG0100+VEG0200+VEG0300+VEG0400+VEG0800+VEG0450+VEG0700+
 		VEG0600+VEG0900+VEG0500)/2
-```
-ref: Development and evaluation of a method for calculating the Healthy Eating Index-2005 using the Nutrition Data System for Research
-```{r}
+
 #GREENS AND BEANS COMPONENT
 data$hei_greensbeans<-(VEG0100+VEG0700)/2
 		
@@ -66,11 +138,7 @@ data$hei_totfruit<-(FRU0100+FRU0200+FRU0300+FRU0400+FRU0500+FRU0600+FRU0700)/2
 data$hei_wholefruit<-(FRU0300+FRU0400+FRU0500+FRU0600+FRU0700)/2
 		
 # WHOLE GRAINS COMPONENT
-#data$hei_wholegrains<-riwholegrains
-data$hei_wholegrains_solo<-(GRW0100+GRW0200+GRW0300+GRW0400+GRW0500+GRW0600)+((GRS0100+GRS0200+GRW0300+GRS0400+GRS0500+GRS0600)/2)
-#sweet cereal, pastries, snackbars, chips
-data$hei_sweetwholegrain<-(GRW0700+GRW0800+GRW1000+GRW0900+GRW1100+GRW1200)+((GRS0700+GRS0800+GRS1000+GRS0900)/2)
-data$hei_wholegrains_general<-data$hei_wholegrains_solo+data$hei_sweetwholegrain
+data$hei_wholegrains<-data$Whole.Grains..ounce.equivalents.
 
 # DAIRY COMPONENT# INCLUDE DAIRY GROUPS ADDED IN 2019
 ## missing DML0500, DYF0300 , DYR0300, DYL0300, DOT0900
@@ -96,13 +164,11 @@ data$hei_seafoodplantprot<-(MFF0100+
 data$hei_sodium <- Sodium..mg./1000
 		
 # REFINED GRAINS COMPONENT
-hei_refinedgrains<-rirefinedgrains
-#some
-
-#all
+data$hei_refinedgrains<-data$Refined.Grains..ounce.equivalents.
 
 # ADDED SUGARS COMPONENT
-	hei_addedsugars<-rias_ts*4 
+data$hei_addedsugars<-Added.Sugars..by.Total.Sugars...g.*4 
+ripctsfa = data$X..Calories.from.SFA*data$Energy..kcal.
 ```
 # Notes
 ## Variables not found
@@ -111,3 +177,62 @@ DYF0300
 DYR0300
 DYL0300
 DOT0900
+
+
+
+# ADEQUACY
+```{r}
+# TOTAL VEGETABLES COMPONENT
+data$HEIX1_TOTALVEG<-adeq_check(data$hei_totveg, data$HEIX1_TOTALVEG,1.1)
+
+## GREENS AND BEANS COMPONENT;
+data$HEIX2_GREEN_AND_BEAN<-adeq_check(data$hei_greensbeans, data$HEIX2_GREEN_AND_BEAN,0.2)
+
+## TOTAL FRUITS COMPONENT;
+data$HEIX3_TOTALFRUIT<-adeq_check(data$hei_totfruit, data$HEIX3_TOTALFRUIT,0.8)
+
+## WHOLE FRUITS COMPONENT
+data$HEIX4_WHOLEFRUIT<-adeq_check(data$hei_wholefruit, data$HEIX4_WHOLEFRUIT, 0.4)
+
+## WHOLE GRAINS COMPONENT;
+data$HEIX5_WHOLEGRAIN<-adeq_check(data$hei_wholegrains, data$HEIX5_WHOLEGRAIN, 1.5)
+
+## DAIRY COMPONENT;
+data$HEIX6_TOTALDAIRY<-adeq_check(data$hei_dairy, data$HEIX6_TOTALDAIRY, 1.3)	
+
+## TOTAL PROTEIN FOODS COMPONENT;
+data$HEIX7_TOTPROT<-adeq_check(data$hei_totproteins, data$HEIX7_TOTPROT, 2.5)
+
+## SEAFOOD AND PLANT PROTEINS COMPONENT;
+data$HEIX8_SEAPLANT_PROT<-adeq_check(data$hei_seafoodplantprot, data$HEIX8_SEAPLANT_PROT, 0.8)
+
+## FATTY ACIDS COMPONENT;
+data$HEIX9_FATTYACID<-fa_adeq(data$Total.Polyunsaturated.Fatty.Acids..PUFA...g., data$Total.Monounsaturated.Fatty.Acids..MUFA...g., data$Total.Saturated.Fatty.Acids..SFA...g.)
+```
+# Moderation
+## Notes
+Check sodium, some are negative 
+```{r}
+## SODIUM COMPONENT
+data$HEIX10_SODIUM<-mod_check(data$hei_sodium, data$HEIX10_SODIUM, 1.1, 2.0)
+
+
+## REFINED GRAINS COMPONENT
+data$HEIX11_REFINEDGRAIN<-mod_check(data$hei_refinedgrains, data$HEIX11_REFINEDGRAIN, 1.8, 4.3)
+
+## ADDED SUGARS COMPONENT
+data$HEIX12_ADDEDSUGARS<-mod_check(data$hei_addedsugars, data$HEIX12_ADDEDSUGARS, 6.5, 26)
+
+## SATURATED FAT COMPONENT;
+data$HEIX13_SATFATS<-mod_check(data$X..Calories.from.SFA, data$HEIX13_SATFATS, 8, 16)
+```
+
+#HEALTHY EATING INDEX 2015
+```{r}
+data$HEI2015_TOTAL_SCORE <- data$HEIX1_TOTALVEG + data$HEIX2_GREEN_AND_BEAN +data$HEIX3 + data$HEIX4_WHOLEFRUIT +
+    data$HEIX5_WHOLEGRAIN + data$HEIX6_TOTALDAIRY + data$HEIX7_TOTPROT + data$HEIX8_SEAPLANT_PROT + data$HEIX9_FATTYACID + 
+	data$HEIX10_SODIUM + data$HEIX11_REFINEDGRAIN + data$HEIX12_ADDEDSUGARS + data$HEIX13_SATFATS
+data$HEI2015_TOTAL_SCORE
+```
+
+
