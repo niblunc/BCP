@@ -1,0 +1,4 @@
+Project Abbreviation	Participant ID	Date of Intake	DSAM Blend Ingredient ID	DSAM Ingredient ID	Ingredient Name	NHANES Ingredient Category	Black Cohosh	Echinacea	Garlic	Ginger	Ginkgo	Ginseng	Hawthorn	Kava Kava	Ma Huang/Ephedra	Saw Palmetto	St. John's Wort
+BCPJulAugMom	361077_R1_01	06/21/2018	002035001	10000352	SPIRULINA	3	N	N	N	N	N	N	N	N	N	N	N
+BCPJulAugMom	361077_R1_01	06/21/2018	002035002	10003916	RED RASPBERRY LEAF (2:1 EXTRACT)	3	N	N	N	N	N	N	N	N	N	N	N
+BCPJulAugMom	361077_R1_01	06/21/2018	002035003	10009082	GINGER RHIZOME JUICE 10:1 EXTRACT	3	N	N	N	Y	N	N	N	N	N	N	N
