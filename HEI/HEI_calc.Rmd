@@ -132,9 +132,9 @@ mod_check<-function(input, new, MIN, MAX){
 Having issues with the text value fields
 Need to assess a better way to read in the data 
 ```{r load_data}
-file09<-read.table("~/Google Drive/BCP/Baby ConnectoMe Datasets/Concat/mom/BCP09.txt", sep="\t", header=T)
+file09<-read.table("~/Google Drive/BCP/data/Concat/Mom_BCP_dataset9.txt", sep="\t", header=T)
 
-file04<-read.table("~/Google Drive/BCP/Baby ConnectoMe Datasets/Concat/mom/BCP04t.txt", sep="\t", header=T)
+file04<-read.table("~/Google Drive/BCP/data/Concat/Mom_BCP_dataset4.txt", sep="\t", header=T)
 file04
 ```
 
