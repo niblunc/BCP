@@ -4,7 +4,7 @@
 Healthy Eating Index and NDSR functions
 This expects a typical zipfile structure from an NDSR download
 Created on Thu Oct  3 16:23:45 2019
-
+Built with python 3.6
 @author: gracer
 """
 
@@ -15,80 +15,99 @@ import warnings
 warnings.filterwarnings('ignore')
 from zipfile import ZipFile
 import argparse
+import pdb
 
 def file_org(infile, arglist, important):
-    file_dict = {"set_04": {"mom":{}, "child": {}}, "set_09": {"mom": {}, "child": {}}}
-    file_dict['set_04']["mom"]["files"] = [x for x in glob.glob(os.path.join(infile,'*04.txt')) if "Mom" in x]
-    file_dict['set_09']["mom"]["files"] = [x for x in glob.glob(os.path.join(infile,'*09.txt')) if "Mom" in x]
-    
-    file_dict['set_04']["child"]["files"] = [x for x in glob.glob(os.path.join(infile,'*04.txt')) if "Chil" in x]
-    file_dict['set_09']["child"]["files"] = [x for x in glob.glob(os.path.join(infile,'*09.txt')) if "Chil" in x]
-    
-    temp_list = []            
-    for file in file_dict["set_04"]["mom"]["files"]:
-        temp_df =  pd.read_csv(file, sep="\t", encoding='latin1')
-        temp_df=temp_df.drop([0])
-        for val in temp_df["Participant ID"]:
-            _id = str(val).lstrip("0").split("_")[0]
-            temp_df.replace(val, _id, inplace=True)
-        temp_list.append(temp_df)
-    dfm4_original = pd.concat(temp_list, ignore_index=True)
-    print("Final dataframe size: ", dfm4_original.shape)
-    dfm4_original = dfm4_original.sort_values(by="Participant ID")
-    
-    for col in dfm4_original:
-        if dfm4_original[col].dtype == np.object_:
-            dfm4_original[col] = (dfm4_original[col].replace(',','.', regex=True))
-    
-    temp_list = []            
-    for file in file_dict["set_09"]["mom"]["files"]:
-        temp_df = pd.read_csv(file,encoding='latin1', sep="\t")
-        temp_df=temp_df.drop([0])
-        for val in temp_df["Participant ID"]:
-            _id = str(val).strip("0").strip(".").split("_")[0]
-            temp_df.replace(val, _id, inplace=True)
-        temp_list.append(temp_df)
-    dfm9_original = pd.concat(temp_list, ignore_index=True)
-    dfm9_original = dfm9_original.sort_values(by="Participant ID")
-    
-    concat_filepath = os.path.join(arglist['BASEPTH'],'Concat','%s_dataset4.txt'%(arglist['NAMES']))
-    dfm4_original.to_csv(concat_filepath, index=False, sep="\t", header=True)
-    
-    concat_filepath = os.path.join(arglist['BASEPTH'],'Concat','%s_dataset9.txt'%(arglist['NAMES']))
-    dfm9_original.to_csv(concat_filepath, index=False, sep="\t", header=True)
-    
-    b=list(dfm9_original['Participant ID'])
-    a=list(dfm4_original['Participant ID'])
-    
-    common=list(set(a) & set(b))
-    missmatch = list(set(a)-set(b))
-    
-    common4=dfm4_original[dfm4_original['Participant ID'].isin(common)]
-    common9=dfm9_original[dfm9_original['Participant ID'].isin(common)]
-    
-    mm4=dfm4_original[dfm4_original['Participant ID'].isin(missmatch)]
-    mm9=dfm9_original[dfm9_original['Participant ID'].isin(missmatch)]
-    
-    total_df = common4.merge(common9.drop_duplicates(subset=['Project Abbreviation','Date of Intake']), how='left')
-    total_df=total_df.dropna(axis=1, how='all')
-    complete=total_df[total_df.columns.intersection(important)].dropna()
-    cind=list(complete.index)
-    complete_df=total_df[total_df.index.isin(cind)]
-    
-    missing_df=total_df[~total_df.index.isin(cind)]
-    missing_df=missing_df.append(mm4)
-    missing_df=missing_df.append(mm9)
-    
-    concat_filepath = os.path.join(arglist['BASEPATH'],'Concat','%s_BCP_datasetTOTAL.txt'%(arglist['NAMES']))
-    complete_df.to_csv(concat_filepath, index=False, sep="\t", header=True)
-    
-    missing_filepath = os.path.join(arglist['BASEPATH'],'Concat','%s_BCP_datasetTOTAL.txt'%(arglist['NAMES']))
-    missing_df.to_csv(missing_filepath, index=False, sep="\t", header=True)
-    return(complete_df)
+    if arglist['OPTS'] == False:
+        file_dict = {"set_04": {"mom":{}}, "set_09": {"mom": {}}}
+        file_dict['set_04']["mom"]["files"] = [x for x in glob.glob(os.path.join(infile,'*04.txt')) if "Mom" in x]
+        file_dict['set_09']["mom"]["files"] = [x for x in glob.glob(os.path.join(infile,'*09.txt')) if "Mom" in x]
+        arglist['OPTS']=['Mom']
+        
+    else:
+#        num=len(arglist['OPTS'])
+        file_dict={"set_04":{},"set_09":{}}
+        for item in arglist['OPTS']:
+            print('this is the item %s'%item)
+            file_dict["set_04"][item]= {}
+            file_dict["set_09"][item]= {}
+
+        for key,value in file_dict.items():
+            keys=list(file_dict[key].keys())
+            for k in keys:
+                print(k)
+                file_dict['set_04']["%s"%k]["files"] = [x for x in glob.glob(os.path.join(infile,'*04.txt')) if '%s'%k in x]
+                file_dict['set_09']["%s"%k]["files"] = [x for x in glob.glob(os.path.join(infile,'*09.txt')) if '%s'%k in x]
+
+    return_dict={}                
+    for ki in arglist['OPTS']:
+        temp_list = []
+        for file in file_dict["set_04"]["%s"%ki]["files"]:
+            temp_df =  pd.read_csv(file, sep="\t", encoding='latin1')
+            temp_df=temp_df.drop([0])
+            for val in temp_df["Participant ID"]:
+                _id = str(val).lstrip("0").split("_")[0]
+                temp_df.replace(val, _id, inplace=True)
+            temp_list.append(temp_df)
+        dfm4_original = pd.concat(temp_list, ignore_index=True)
+        print("Final dataframe size: ", dfm4_original.shape)
+        dfm4_original = dfm4_original.sort_values(by="Participant ID")
+        
+        for col in dfm4_original:
+            if dfm4_original[col].dtype == np.object_:
+                dfm4_original[col] = (dfm4_original[col].replace(',','.', regex=True))
+        
+        temp_list = []            
+        for file in file_dict["set_09"]["%s"%ki]["files"]:
+            temp_df = pd.read_csv(file,encoding='latin1', sep="\t")
+            temp_df=temp_df.drop([0])
+            for val in temp_df["Participant ID"]:
+                _id = str(val).strip("0").strip(".").split("_")[0]
+                temp_df.replace(val, _id, inplace=True)
+            temp_list.append(temp_df)
+        dfm9_original = pd.concat(temp_list, ignore_index=True)
+        dfm9_original = dfm9_original.sort_values(by="Participant ID")
+        
+        concat_filepath = os.path.join(arglist['BASEPATH'],'Concat','%s_dataset4.txt'%(arglist['NAMES']))
+        dfm4_original.to_csv(concat_filepath, index=False, sep="\t", header=True)
+        
+        concat_filepath = os.path.join(arglist['BASEPATH'],'Concat','%s_dataset9.txt'%(arglist['NAMES']))
+        dfm9_original.to_csv(concat_filepath, index=False, sep="\t", header=True)
+        
+        b=list(dfm9_original['Participant ID'])
+        a=list(dfm4_original['Participant ID'])
+        
+        common=list(set(a) & set(b))
+        missmatch = list(set(a)-set(b))
+        
+        common4=dfm4_original[dfm4_original['Participant ID'].isin(common)]
+        common9=dfm9_original[dfm9_original['Participant ID'].isin(common)]
+        
+        mm4=dfm4_original[dfm4_original['Participant ID'].isin(missmatch)]
+        mm9=dfm9_original[dfm9_original['Participant ID'].isin(missmatch)]
+        
+        total_df = common4.merge(common9.drop_duplicates(subset=['Project Abbreviation','Date of Intake']), how='left')
+        total_df=total_df.dropna(axis=1, how='all')
+        complete=total_df[total_df.columns.intersection(important)].dropna()
+        cind=list(complete.index)
+        complete_df=total_df[total_df.index.isin(cind)]
+        
+        missing_df=total_df[~total_df.index.isin(cind)]
+        missing_df=missing_df.append(mm4)
+        missing_df=missing_df.append(mm9)
+        
+        concat_filepath = os.path.join(arglist['BASEPATH'],'Concat','%s_BCP_datasetTOTAL.txt'%(ki))
+        complete_df.to_csv(concat_filepath, index=False, sep="\t", header=True)
+        
+        missing_filepath = os.path.join(arglist['BASEPATH'],'Concat','%s_BCP_datasetTOTAL.txt'%(ki))
+        missing_df.to_csv(missing_filepath, index=False, sep="\t", header=True)
+        return_dict[ki]=complete_df
+    return(return_dict)
+
     
 def make_components(hei_dict, complete_df):
     for key, value in hei_dict.items():
-        print(key)
+#        print(key)
         if key in ['hei_totveg','hei_greensbeans','hei_totfruit', 'hei_wholefruit']:
             x=value
             complete_df[key] = complete_df[x].astype('float').sum(axis=1)
@@ -141,6 +160,7 @@ def make_components(hei_dict, complete_df):
 def grouper(complete_df, interest):
     data_dict={}
     dailyhei0409=complete_df[complete_df.columns.intersection(interest)].groupby(['Participant ID']).mean()
+    dailyhei0409['Participant ID'] = dailyhei0409.index
     data_dict['hei0409']=complete_df
     data_dict['dailyhei0409']=dailyhei0409
     return(data_dict)
@@ -175,7 +195,7 @@ def mod_check(df,inputt, output, parameter):
         tmp= df['% Calories from SFA']
         df[output] = [0 if x > parameter[1] else 10 if x < parameter[0] else 10-(10*((x-parameter[0])/(parameter[1]-parameter[0]))) for x in tmp]
         
-def check(x, data):
+def check(x, data, name):
     df=data
     toSum=['HEIX1_TOTALVEG','HEIX2_GREEN_AND_BEAN' , 'HEIX3_TOTALFRUIT' , 'HEIX4_WHOLEFRUIT' , 
            'HEIX5_WHOLEGRAIN' , 'HEIX6_TOTALDAIRY' , 'HEIX7_TOTPROT' , 'HEIX8_SEAPLANT_PROT' , 'HEIX9_FATTYACID' , 
@@ -192,9 +212,14 @@ def check(x, data):
             mod_check(df, key, values['name'], values['parameters'])
 
     df['HEI2015_TOTAL_SCORE']=df[df.columns.intersection(toSum)].sum(axis=1)
+    print(list(df.columns))
+    concat_filepath = os.path.join(arglist['BASEPATH'],'Concat','%s_%s_HEI.txt'%(arglist['NAMES'], name))
+    df.to_csv(concat_filepath, index=False, sep="\t", header=True)
     
 
 def main():
+    print(arglist)
+    
 #    Dictionaries and lists
     
     important=['Participant ID','VEG0100','VEG0200','VEG0300','VEG0400','VEG0800','VEG0450','VEG0700',
@@ -267,19 +292,7 @@ def main():
             'Total Monounsaturated Fatty Acids (MUFA) (g)', 'Total Saturated Fatty Acids (SFA) (g)', 
             'hei_sodium', 'hei_refinedgrains', 'hei_addedsugars', 'ripctsfa','energy','% Calories from SFA']
 
-#commandline parser
-    parser=argparse.ArgumentParser(description='Calculating HEI')
-    
-    parser.add_argument('-basepath',dest='BASEPATH', action='store_true',
-                        default=False, help='Where dem files at boo?')
-    parser.add_argument('-file_names',dest='NAMES', action='store_true',
-                        default=False, help='What do you want the output 04 and 09 called?')
-    
-    args = parser.parse_args()
-    arglist={}
-    for a in args._get_kwargs():
-        arglist[a[0]]=a[1]
-    print(arglist)
+
     
     for (dirpath, dirnames, filenames) in os.walk(arglist['BASEPATH']):
         for filename in filenames:
@@ -300,13 +313,32 @@ def main():
     infile = os.path.join(arglist['BASEPATH'],'temp_txt')
 
 #Get func-y    
-    complete_df=file_org(infile, arglist, important)
-    complete_df=make_components(hei_dict, complete_df)
-    data_dict=grouper(complete_df, interest)
-    for key, item in data_dict.items():
-        check(para_dict, item)
+    x=file_org(infile, arglist, important)
+    y=make_components(hei_dict, x)
+    z=grouper(y, interest)
+    for key, item in z.items():
+        print(key)
+        check(para_dict, item, key)
     
 if __name__ == "__main__":
+    #commandline parser
+    parser=argparse.ArgumentParser(description='Calculating HEI')
+    
+    parser.add_argument('-basepath', dest='BASEPATH', action='store',
+                        default=False, help='Where dem files at boo?')
+    parser.add_argument('-file_names',dest='NAMES', action='store',
+                        default=False, help='What do you want the output 04 and 09 called?')
+    parser.add_argument('-options',dest='OPTS', nargs='+',
+                        default=False, help='Do you have multiple different 04 and 09 files that need to be kept seperate? Please enter strings that can be searched with (this should be in the file path) no commas')
+    parser.add_argument('-child',dest='CHILD', action='store',
+                        default=False, help='Is this pediatric data? If True, then you need the following other files: ')
+    
+    args = parser.parse_args()
+    arglist={}
+    for a in args._get_kwargs():
+        print(a)
+        arglist[a[0]]=a[1]
+#    print(arglist)
     main()
     
     
