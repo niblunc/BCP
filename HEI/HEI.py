@@ -19,10 +19,11 @@ import pdb
 
 def file_org(infile, arglist, important):
     if arglist['OPTS'] == False:
-        file_dict = {"set_04": {"mom":{}}, "set_09": {"mom": {}}}
-        file_dict['set_04']["mom"]["files"] = [x for x in glob.glob(os.path.join(infile,'*04.txt')) if "Mom" in x]
-        file_dict['set_09']["mom"]["files"] = [x for x in glob.glob(os.path.join(infile,'*09.txt')) if "Mom" in x]
-        arglist['OPTS']=['Mom']
+        arglist['OPTS']=[arglist['NAMES']]
+        file_dict = {"set_04": {"%s"%arglist['NAMES']:{}}, "set_09": {"%s"%arglist['NAMES']: {}}}
+        file_dict['set_04']["%s"%arglist['NAMES']]["files"] = [x for x in glob.glob(os.path.join(infile,'*04.txt')) if "%s"%arglist['NAMES'] in x]
+        file_dict['set_09']["%s"%arglist['NAMES']]["files"] = [x for x in glob.glob(os.path.join(infile,'*09.txt')) if "%s"%arglist['NAMES'] in x]
+        arglist['OPTS']=[arglist['NAMES']]
         
     else:
 #        num=len(arglist['OPTS'])
@@ -42,6 +43,7 @@ def file_org(infile, arglist, important):
     return_dict={}                
     for ki in arglist['OPTS']:
         temp_list = []
+        print(ki)
         for file in file_dict["set_04"]["%s"%ki]["files"]:
             temp_df =  pd.read_csv(file, sep="\t", encoding='latin1')
             temp_df=temp_df.drop([0])
@@ -67,11 +69,11 @@ def file_org(infile, arglist, important):
             temp_list.append(temp_df)
         dfm9_original = pd.concat(temp_list, ignore_index=True)
         dfm9_original = dfm9_original.sort_values(by="Participant ID")
-        
-        concat_filepath = os.path.join(arglist['BASEPATH'],'Concat','%s_dataset4.txt'%(arglist['NAMES']))
+
+        concat_filepath = os.path.join(arglist['SAVE'],'%s_dataset4.txt'%(ki))
         dfm4_original.to_csv(concat_filepath, index=False, sep="\t", header=True)
         
-        concat_filepath = os.path.join(arglist['BASEPATH'],'Concat','%s_dataset9.txt'%(arglist['NAMES']))
+        concat_filepath = os.path.join(arglist['SAVE'],'%s_dataset9.txt'%(ki))
         dfm9_original.to_csv(concat_filepath, index=False, sep="\t", header=True)
         
         b=list(dfm9_original['Participant ID'])
@@ -96,10 +98,10 @@ def file_org(infile, arglist, important):
         missing_df=missing_df.append(mm4)
         missing_df=missing_df.append(mm9)
         
-        concat_filepath = os.path.join(arglist['BASEPATH'],'Concat','%s_BCP_datasetTOTAL.txt'%(ki))
+        concat_filepath = os.path.join(arglist['SAVE'],'%s_BCP_datasetTOTAL.txt'%(ki))
         complete_df.to_csv(concat_filepath, index=False, sep="\t", header=True)
         
-        missing_filepath = os.path.join(arglist['BASEPATH'],'Concat','%s_BCP_datasetTOTAL.txt'%(ki))
+        missing_filepath = os.path.join(arglist['SAVE'],'%s_BCP_datasetMissing.txt'%(ki))
         missing_df.to_csv(missing_filepath, index=False, sep="\t", header=True)
         return_dict[ki]=complete_df
     return(return_dict)
@@ -195,7 +197,7 @@ def mod_check(df,inputt, output, parameter):
         tmp= df['% Calories from SFA']
         df[output] = [0 if x > parameter[1] else 10 if x < parameter[0] else 10-(10*((x-parameter[0])/(parameter[1]-parameter[0]))) for x in tmp]
         
-def check(x, data, name):
+def check(x, data, name, option):
     df=data
     toSum=['HEIX1_TOTALVEG','HEIX2_GREEN_AND_BEAN' , 'HEIX3_TOTALFRUIT' , 'HEIX4_WHOLEFRUIT' , 
            'HEIX5_WHOLEGRAIN' , 'HEIX6_TOTALDAIRY' , 'HEIX7_TOTPROT' , 'HEIX8_SEAPLANT_PROT' , 'HEIX9_FATTYACID' , 
@@ -213,11 +215,15 @@ def check(x, data, name):
 
     df['HEI2015_TOTAL_SCORE']=df[df.columns.intersection(toSum)].sum(axis=1)
     print(list(df.columns))
-    concat_filepath = os.path.join(arglist['BASEPATH'],'Concat','%s_%s_HEI.txt'%(arglist['NAMES'], name))
+    concat_filepath = os.path.join(arglist['SAVE'],'%s_%s_HEI.txt'%(option, name))
     df.to_csv(concat_filepath, index=False, sep="\t", header=True)
     
 
 def main():
+    if arglist['SAVE'] == False:
+        print('Hi')
+        arglist.pop('SAVE')
+        arglist['SAVE']=arglist['BASEPATH']
     print(arglist)
     
 #    Dictionaries and lists
@@ -293,7 +299,8 @@ def main():
             'hei_sodium', 'hei_refinedgrains', 'hei_addedsugars', 'ripctsfa','energy','% Calories from SFA']
 
 
-    
+ # Find the data
+   
     for (dirpath, dirnames, filenames) in os.walk(arglist['BASEPATH']):
         for filename in filenames:
             if filename.endswith('.zip'):
@@ -314,11 +321,12 @@ def main():
 
 #Get func-y    
     x=file_org(infile, arglist, important)
-    y=make_components(hei_dict, x)
-    z=grouper(y, interest)
-    for key, item in z.items():
-        print(key)
-        check(para_dict, item, key)
+    for key,value in x.items():
+        y=make_components(hei_dict, value)
+        z=grouper(y, interest)
+        for k, item in z.items():
+            print(k)
+            check(para_dict, item, k, key)
     
 if __name__ == "__main__":
     #commandline parser
@@ -332,13 +340,14 @@ if __name__ == "__main__":
                         default=False, help='Do you have multiple different 04 and 09 files that need to be kept seperate? Please enter strings that can be searched with (this should be in the file path) no commas')
     parser.add_argument('-child',dest='CHILD', action='store',
                         default=False, help='Is this pediatric data? If True, then you need the following other files: ')
+    parser.add_argument('-save',dest='SAVE', action='store',
+                        default=False, help='Path to save output, if not filled in will default to the basepath')
     
     args = parser.parse_args()
     arglist={}
     for a in args._get_kwargs():
-        print(a)
         arglist[a[0]]=a[1]
-#    print(arglist)
+
     main()
     
     
