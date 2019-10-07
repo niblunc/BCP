@@ -1,0 +1,289 @@
+---
+title: "BCP HEI"
+output: html_notebook
+---
+
+```{r setup}
+library(plyr)
+library(dplyr)
+library(utils)
+```
+
+# About the data
+Intake Properties Totals File (File 04)
+Serving Count Totals File (File 09)
+
+####### will redo eventually 
+zip <- ".zip"
+data_dir_path = "~/Desktop/Baby ConnectoMe Datasets/Concat/"
+
+file_list<-Sys.glob(file.path(paste0(data_dir_path,'*',zip, collapse ='')))
+files_zipped<-lapply(X = file_list, FUN = unzip)
+
+fours<-lapply(files_zipped, function(i){
+  grep("04",i,value = TRUE)
+})
+
+nines<-lapply(files_zipped, function(i){
+  grep("09",i,value = TRUE)
+})
+
+
+
+All4 <- lapply(fours,function(i){
+  read.table(i, header=TRUE, sep="\t")
+})
+
+All9 <- lapply(nines,function(i){
+  read.table(i, header=TRUE, sep="\t")
+})
+
+All9[[2]]$Participant.ID
+l<-strsplit(as.character(All9[[2]]$Participant.ID), "_")
+l
+df<-lapply(l, function(i){
+  data.frame(matrix(unlist(i), ncol=3, byrow=TRUE))
+})
+
+df
+df <- data.frame(matrix(unlist(l), byrow=T))
+unlist(l)
+df
+df<-matrix(unlist(strsplit(as.character(All9[[2]]$Participant.ID), "_")), ncol=2, byrow=TRUE)
+df
+
+
+
+
+# Important functions
+```{r}
+adeq_check<-function(inital, new, parameter){
+  #parameters are based on the HEI 2015 from NDSR SAS HEI script
+  v5<-c(data$hei_totveg, data$hei_greensbeans, data$hei_totfruit, data$hei_wholefruit, data$hei_totproteins, data$hei_seafoodplantprot)
+  
+  if(inital %in% v5 == TRUE){
+    print("neat")
+    init= inital/data$energy
+    
+    new	<-ifelse(init==0, 0, NA)
+    new	<-ifelse(init >= parameter, 5, NA)
+    new	<-ifelse(is.na(new), 5*(init/parameter),new)
+    
+  }
+}
+
+
+adeq_check10<-function(inital, new, parameter){
+  #parameters are based on the HEI 2015 from NDSR SAS HEI script
+  v10<-c(data$hei_wholegrains, data$hei_dairy)
+  
+  if(inital %in% v10 == TRUE){
+    print("cool")
+    init= inital/data$energy
+    
+    new	<-ifelse(init==0, 0, NA)
+    new	<-ifelse(init >= parameter, 10, NA)
+    new	<-ifelse(is.na(new), 10*(init/parameter),new)
+  } 
+}
+
+
+fa_adeq<-function(poly,mono,sat){
+  FARMIN=1.2
+  FARMAX=2.5
+  init=(poly+mono)/sat
+  new <-ifelse(init <= FARMIN, 0, NA)
+  new <-ifelse(init > FARMAX, 10, NA)
+  new	<-ifelse(is.na(new), 10*((init-FARMIN)/(FARMAX-FARMIN)),new)
+}
+
+mod_check<-function(input, new, MIN, MAX){
+  v1<-c(data$hei_sodium, data$hei_refinedgrains)
+  v2<-c(data$hei_addedsugars)
+  v3<-c(data$X..Calories.from.SFA)
+  if(input %in% v1 == TRUE){
+  init=input/data$energy
+  
+  new <-ifelse(init >= MAX, 0, NA)
+  new <-ifelse(init <= MIN, 10, NA)
+  new	<-ifelse(is.na(new), 10-(10*((init-MIN)/(MAX-MIN))),new)
+  
+  }else if(input %in% v2 == TRUE){
+    print("sweet")
+    init=100*input/data$Energy..kcal.
+    
+    new <-ifelse(init >= MAX, 0, NA)
+    new <-ifelse(init < MIN, 10, NA)
+    new	<-ifelse(is.na(new), 10-(10*((init-MIN)/(MAX-MIN))),new)
+  }else if(input %in% v3 == TRUE){
+    init=input
+    
+    new <-ifelse(init > MAX, 0, NA)
+    new <-ifelse(init < MIN, 10, NA)
+    new	<-ifelse(is.na(new), 10-(10*((init-MIN)/(MAX-MIN))),new)
+  }
+}
+```
+
+
+
+# Load data
+# Notes
+Having issues with the text value fields
+Need to assess a better way to read in the data 
+```{r load_data}
+file09<-read.table("~/Google Drive/BCP/data/Concat/Mom_BCP_dataset9.txt", sep="\t", header=T)
+
+file04<-read.table("~/Google Drive/BCP/data/Concat/Mom_BCP_dataset4.txt", sep="\t", header=T)
+file04
+```
+
+```{r}
+data<-join(file04, file09)
+dim(data)
+
+# make the data numeric instead of factors
+data[,19:392]<-apply(data[,19:392], MARGIN = 2, as.numeric)
+```
+
+# Check if the data is non-zero
+deciding if I want this
+```{r}
+data$energy<-data$Energy..kcal./1000 
+
+#ifelse(data$Energy..kcal. > 0, )
+#if rikcal=0 then do;
+#  HEIX1_TOTALVEG=0; HEIX2_GREEN_AND_BEAN=0; HEIX3_TOTALFRUIT=0; HEIX4_WHOLEFRUIT=0; HEIX5_WHOLEGRAIN=0; HEIX6_TOTALDAIRY=0;
+#  HEIX7_TOTPROT=0;  HEIX8_SEAPLANT_PROT=0; HEIX9_FATTYACID=0; HEIX10_SODIUM=0; HEIX11_REFINEDGRAIN=0; HEIX12_ADDEDSUGARS=0; 
+#  HEIX13_SATFATS=0;
+```
+
+# Grouping stuff
+Need to figure out the naming convention 
+
+```{r}
+#proc means data=hei0409togroup noprint;
+#  by cpartid;
+#  var rikcal hei_totveg hei_greensbeans hei_totfruit hei_wholefruit hei_wholegrains hei_dairy hei_totproteins hei_seafoodplantprot 
+#		ripfa rimfa risfa hei_sodium hei_refinedgrains hei_addedsugars ripctsfa;
+#  output out=dailyhei0409 sum=;
+#run;
+group_data <- group_by(.data = data, data$Participant.ID)
+group_data
+```
+
+
+# Creating components
+ref: Development and evaluation of a method for calculating the Healthy Eating Index-2005 using the Nutrition Data System for Research
+```{r}
+#TOTAL VEGETABLES COMPONENT
+data$hei_totveg<-(data$VEG0100+data$VEG0200+data$VEG0300+data$VEG0400+data$VEG0800+data$VEG0450+data$VEG0700+
+		data$VEG0600+data$VEG0900+data$VEG0500)/2
+
+#GREENS AND BEANS COMPONENT
+data$hei_greensbeans<-(data$VEG0100+data$VEG0700)/2
+		
+#TOTAL FRUITS COMPONENT
+data$hei_totfruit<-(data$FRU0100+data$FRU0200+data$FRU0300+data$FRU0400+data$FRU0500+data$FRU0600+data$FRU0700)/2
+  
+# WHOLE FRUITS COMPONENT
+data$hei_wholefruit<-(data$FRU0300+data$FRU0400+data$FRU0500+data$FRU0600+data$FRU0700)/2
+		
+# WHOLE GRAINS COMPONENT
+data$hei_wholegrains<-data$Whole.Grains..ounce.equivalents.
+
+# DAIRY COMPONENT# INCLUDE DAIRY GROUPS ADDED IN 2019
+## missing DML0500, DYF0300 , DYR0300, DYL0300, DOT0900
+data$hei_dairy<-(data$DMF0100+data$DMR0100+data$DML0100+data$DMN0100+data$DMF0200+data$DMR0200+
+		data$DML0200+data$DML0300+data$DML0400+data$DCF0100+data$DCR0100+data$DCL0100+data$DCN0100+
+		data$DYF0100+data$DYR0100+data$DYL0100+data$DYF0200+data$DYR0200+data$DYL0200+data$DYN0100+
+		((data$DOT0100)/3)+data$DOT0300+data$DOT0400+data$DOT0500+data$DOT0600)
+		
+# TOTAL PROTEIN FOODS COMPONENT
+data$hei_totproteins<-(data$MRF0100+data$MRL0100+data$MRF0200+data$MRL0200+
+		data$MRF0300+data$MRL0300+data$MRF0400+data$MRL0400+data$MCF0200+data$MCL0200+data$MRF0500+
+		data$MPF0100+data$MPL0100+data$MPF0200+data$MFF0100+data$MFL0100+data$MFF0200+data$MSL0100+
+		data$MSF0100+data$MCF0100+data$MCL0100+data$MOF0100+data$MOF0200+data$MOF0300+data$MOF0400+
+		data$MOF0500+data$MOF0600+data$MOF0700+(data$VEG0700*2))
+
+# SEAFOOD AND PLANT PROTEINS COMPONENT
+data$hei_seafoodplantprot<-(data$MFF0100+
+		data$MFL0100+data$MFF0200+data$MSL0100+data$MSF0100+data$MOF0500+data$MOF0600+data$MOF0700+
+		(data$VEG0700*2))
+		
+## MODERATION
+# SODIUM COMPONENT
+data$hei_sodium <- data$Sodium..mg./1000
+		
+# REFINED GRAINS COMPONENT
+data$hei_refinedgrains<-data$Refined.Grains..ounce.equivalents.
+
+# ADDED SUGARS COMPONENT
+data$hei_addedsugars<-data$Added.Sugars..by.Total.Sugars...g.*4 
+data$ripctsfa = data$X..Calories.from.SFA*data$Energy..kcal.
+```
+
+# Notes
+## Variables not found
+DML0500 
+DYF0300 
+DYR0300
+DYL0300
+DOT0900
+
+# ADEQUACY
+```{r}
+# TOTAL VEGETABLES COMPONENT
+data$HEIX1_TOTALVEG<-adeq_check(data$hei_totveg, data$HEIX1_TOTALVEG,1.1)
+
+## GREENS AND BEANS COMPONENT;
+data$HEIX2_GREEN_AND_BEAN<-adeq_check(data$hei_greensbeans, data$HEIX2_GREEN_AND_BEAN,0.2)
+
+## TOTAL FRUITS COMPONENT;
+data$HEIX3_TOTALFRUIT<-adeq_check(data$hei_totfruit, data$HEIX3_TOTALFRUIT,0.8)
+
+## WHOLE FRUITS COMPONENT
+data$HEIX4_WHOLEFRUIT<-adeq_check(data$hei_wholefruit, data$HEIX4_WHOLEFRUIT, 0.4)
+
+## WHOLE GRAINS COMPONENT;
+data$HEIX5_WHOLEGRAIN<-adeq_check(data$hei_wholegrains, data$HEIX5_WHOLEGRAIN, 1.5)
+
+## DAIRY COMPONENT;
+data$HEIX6_TOTALDAIRY<-adeq_check10(data$hei_dairy, data$HEIX6_TOTALDAIRY, 1.3)	
+
+## TOTAL PROTEIN FOODS COMPONENT;
+data$HEIX7_TOTPROT<-adeq_check(data$hei_totproteins, data$HEIX7_TOTPROT, 2.5)
+
+## SEAFOOD AND PLANT PROTEINS COMPONENT;
+data$HEIX8_SEAPLANT_PROT<-adeq_check(data$hei_seafoodplantprot, data$HEIX8_SEAPLANT_PROT, 0.8)
+
+## FATTY ACIDS COMPONENT;
+data$HEIX9_FATTYACID<-fa_adeq(data$Total.Polyunsaturated.Fatty.Acids..PUFA...g., data$Total.Monounsaturated.Fatty.Acids..MUFA...g., data$Total.Saturated.Fatty.Acids..SFA...g.)
+```
+# Moderation
+## Notes
+Check sodium, some are negative 
+```{r}
+## SODIUM COMPONENT
+data$HEIX10_SODIUM<-mod_check(data$hei_sodium, data$HEIX10_SODIUM, 1.1, 2.0)
+
+
+## REFINED GRAINS COMPONENT
+data$HEIX11_REFINEDGRAIN<-mod_check(data$hei_refinedgrains, data$HEIX11_REFINEDGRAIN, 1.8, 4.3)
+
+## ADDED SUGARS COMPONENT
+data$HEIX12_ADDEDSUGARS<-mod_check(data$hei_addedsugars, data$HEIX12_ADDEDSUGARS, 6.5, 26)
+
+## SATURATED FAT COMPONENT;
+data$HEIX13_SATFATS<-mod_check(data$X..Calories.from.SFA, data$HEIX13_SATFATS, 8, 16)
+```
+
+#HEALTHY EATING INDEX 2015
+```{r}
+data$HEI2015_TOTAL_SCORE <- data$HEIX1_TOTALVEG + data$HEIX2_GREEN_AND_BEAN +data$HEIX3 + data$HEIX4_WHOLEFRUIT +
+    data$HEIX5_WHOLEGRAIN + data$HEIX6_TOTALDAIRY + data$HEIX7_TOTPROT + data$HEIX8_SEAPLANT_PROT + data$HEIX9_FATTYACID + 
+	data$HEIX10_SODIUM + data$HEIX11_REFINEDGRAIN + data$HEIX12_ADDEDSUGARS + data$HEIX13_SATFATS
+data$HEI2015_TOTAL_SCORE
+```
+
+
