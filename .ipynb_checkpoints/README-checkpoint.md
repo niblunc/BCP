@@ -1,1 +1,2 @@
-# BCP
+# Baby Connectome Project (BCP)  
+
