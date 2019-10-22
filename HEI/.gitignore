@@ -3,3 +3,4 @@
 *.to_tsv
 *.csv
 *.xlsx
+__pycache__/
