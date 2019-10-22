@@ -15,7 +15,7 @@ import argparse
 
 import HEI
 
-def main():
+def main(arglist):
     if arglist['SAVE'] == False:
         print('Hi')
         arglist.pop('SAVE')
@@ -116,13 +116,17 @@ def main():
     infile = os.path.join(arglist['BASEPATH'],'temp_txt')
 
 #Get func-y
-    x=file_org(infile, arglist, important)
+    # print(infile)
+    # print(arglist)
+    # print(important)
+    x=HEI.file_org(infile, arglist, important)
+
     for key,value in x.items():
-        y=make_components(hei_dict, value)
-        z=grouper(y, interest)
+        y=HEI.make_components(hei_dict, value)
+        z=HEI.grouper(y, interest)
         for k, item in z.items():
             print(k)
-            check(para_dict, item, k, key)
+            HEI.check(para_dict, item, k, key, arglist)
 
 if __name__ == "__main__":
     #commandline parser
@@ -144,4 +148,4 @@ if __name__ == "__main__":
     for a in args._get_kwargs():
         arglist[a[0]]=a[1]
 
-    main()
+    main(arglist)
