@@ -71,11 +71,11 @@ def file_org(infile, arglist, important):
         dfm9_original = pd.concat(temp_list, ignore_index=True)
         dfm9_original = dfm9_original.sort_values(by="Participant ID")
 
-        concat_filepath = os.path.join(arglist['SAVE'],'%s_dataset4.txt'%(ki))
-        dfm4_original.to_csv(concat_filepath, index=False, sep="\t", header=True)
+        concat_filepath = os.path.join(arglist['SAVE'],'%s_dataset4.csv'%(ki))
+        dfm4_original.to_csv(concat_filepath, index=False, sep=",", header=True)
 
-        concat_filepath = os.path.join(arglist['SAVE'],'%s_dataset9.txt'%(ki))
-        dfm9_original.to_csv(concat_filepath, index=False, sep="\t", header=True)
+        concat_filepath = os.path.join(arglist['SAVE'],'%s_dataset9.csv'%(ki))
+        dfm9_original.to_csv(concat_filepath, index=False, sep=",", header=True)
 
         b=list(dfm9_original['Participant ID'])
         a=list(dfm4_original['Participant ID'])
@@ -99,11 +99,11 @@ def file_org(infile, arglist, important):
         missing_df=missing_df.append(mm4)
         missing_df=missing_df.append(mm9)
 
-        concat_filepath = os.path.join(arglist['SAVE'],'%s_BCP_datasetTOTAL.txt'%(ki))
-        complete_df.to_csv(concat_filepath, index=False, sep="\t", header=True)
+        concat_filepath = os.path.join(arglist['SAVE'],'%s_BCP_datasetTOTAL.csv'%(ki))
+        complete_df.to_csv(concat_filepath, index=False, sep=",", header=True)
 
-        missing_filepath = os.path.join(arglist['SAVE'],'%s_BCP_datasetMissing.txt'%(ki))
-        missing_df.to_csv(missing_filepath, index=False, sep="\t", header=True)
+        missing_filepath = os.path.join(arglist['SAVE'],'%s_BCP_datasetMissing.csv'%(ki))
+        missing_df.to_csv(missing_filepath, index=False, sep=",", header=True)
         return_dict[ki]=complete_df
     return(return_dict)
 
@@ -216,8 +216,8 @@ def check(x, data, name, option, arglist):
 
     df['HEI2015_TOTAL_SCORE']=df[df.columns.intersection(toSum)].sum(axis=1)
     print(list(df.columns))
-    concat_filepath = os.path.join(arglist['SAVE'],'%s_%s_HEI.txt'%(option, name))
-    df.to_csv(concat_filepath, index=False, sep="\t", header=True)
+    concat_filepath = os.path.join(arglist['SAVE'],'%s_%s_HEI.csv'%(option, name))
+    df.to_csv(concat_filepath, index=False, sep=",", header=True)
 
 
 def main():

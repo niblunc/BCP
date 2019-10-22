@@ -12,7 +12,7 @@ import warnings
 warnings.filterwarnings('ignore')
 from zipfile import ZipFile
 import argparse
-
+import pdb
 import HEI
 
 def main(arglist):
@@ -38,6 +38,22 @@ def main(arglist):
            'Added Sugars (by Total Sugars) (g)','% Calories from SFA','Energy (kcal)',
            'Total Polyunsaturated Fatty Acids (PUFA) (g)','Total Monounsaturated Fatty Acids (MUFA) (g)',
            'Total Saturated Fatty Acids (SFA) (g)']
+
+
+    ped_important=['Participant ID','VEG0100','VEG0200','VEG0300','VEG0400','VEG0800','VEG0450','VEG0700',
+          'VEG0600','VEG0900','VEG0500','VEG0100','VEG0700','FRU0100','FRU0200','FRU0300','FRU0400',
+          'FRU0500','FRU0600','FRU0700','FRU0300','FRU0400','FRU0500','FRU0600','FRU0700',
+          'Whole Grains (ounce equivalents)','DMF0100','DMR0100','DML0100','DMN0100','DMF0200',
+          'DMR0200','DML0200','DML0300','DML0400','DCF0100','DCR0100','DCL0100','DCN0100','DYF0100',
+          'DYR0100','DYL0100','DYF0200','DYR0200','DYL0200','DYN0100','DOT0300','DOT0400','DOT0500',
+          'DOT0600','DOT0100','MRF0100','MRL0100','MRF0200','MRL0200','MRF0300','MRL0300','MRF0400',
+          'MRL0400','MCF0200','MCL0200','MRF0500','MPF0100','MPL0100','MPF0200','MFF0100','MFL0100',
+          'MFF0200','MSL0100','MSF0100','MCF0100','MCL0100','MOF0100','MOF0200','MOF0300','MOF0400',
+          'MOF0500','MOF0600','MOF0700','VEG0700','MFF0100','MFL0100','MFF0200','MSL0100','MSF0100',
+          'MOF0500','MOF0600','MOF0700','VEG0700','Sodium (mg)','Refined Grains (ounce equivalents)',
+          'Added Sugars (by Total Sugars) (g)','% Calories from SFA','Energy (kcal)',
+          'Total Polyunsaturated Fatty Acids (PUFA) (g)','Total Monounsaturated Fatty Acids (MUFA) (g)',
+          'Total Saturated Fatty Acids (SFA) (g)']
 
     para_dict = {'hei_totveg': {'parameters':[1.1], 'name': 'HEIX1_TOTALVEG'},
              'hei_greensbeans': {'parameters':[0.2], 'name': 'HEIX2_GREEN_AND_BEAN'},
@@ -119,14 +135,21 @@ def main(arglist):
     # print(infile)
     # print(arglist)
     # print(important)
-    x=HEI.file_org(infile, arglist, important)
+    if arglist['CHILD'] == False:
+        x=HEI.file_org(infile, arglist, important)
 
-    for key,value in x.items():
-        y=HEI.make_components(hei_dict, value)
-        z=HEI.grouper(y, interest)
-        for k, item in z.items():
-            print(k)
-            HEI.check(para_dict, item, k, key, arglist)
+        for key,value in x.items():
+            y=HEI.make_components(hei_dict, value)
+            z=HEI.grouper(y, interest)
+            for k, item in z.items():
+                print(k)
+                HEI.check(para_dict, item, k, key, arglist)
+    else:
+        x=HEI.file_org(infile, arglist, ped_important)
+        pdb.set_trace()
+        for key, value in x.items():
+            print("this is the key %s"%key)
+            print(value)
 
 if __name__ == "__main__":
     #commandline parser
@@ -139,7 +162,9 @@ if __name__ == "__main__":
     parser.add_argument('-options',dest='OPTS', nargs='+',
                         default=False, help='Do you have multiple different 04 and 09 files that need to be kept seperate? Please enter strings that can be searched with (this should be in the file path) no commas')
     parser.add_argument('-child',dest='CHILD', action='store',
-                        default=False, help='Is this pediatric data? If True, then you need the following other files: ')
+                        default=False, help='Is this pediatric data? If True, then you need the following other files: breastfeeding data')
+    parser.add_argument('-xtra', dest='XTRA', nargs='+',
+                        default=False, help='This should be a path to breastfeeding data for the child')
     parser.add_argument('-save',dest='SAVE', action='store',
                         default=False, help='Path to save output, if not filled in will default to the basepath')
 
