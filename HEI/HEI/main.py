@@ -37,23 +37,8 @@ def main(arglist):
            'MOF0500','MOF0600','MOF0700','VEG0700','Sodium (mg)','Refined Grains (ounce equivalents)',
            'Added Sugars (by Total Sugars) (g)','% Calories from SFA','Energy (kcal)',
            'Total Polyunsaturated Fatty Acids (PUFA) (g)','Total Monounsaturated Fatty Acids (MUFA) (g)',
-           'Total Saturated Fatty Acids (SFA) (g)']
-
-
-    ped_important=['Participant ID','VEG0100','VEG0200','VEG0300','VEG0400','VEG0800','VEG0450','VEG0700',
-          'VEG0600','VEG0900','VEG0500','VEG0100','VEG0700','FRU0100','FRU0200','FRU0300','FRU0400',
-          'FRU0500','FRU0600','FRU0700','FRU0300','FRU0400','FRU0500','FRU0600','FRU0700',
-          'Whole Grains (ounce equivalents)','DMF0100','DMR0100','DML0100','DMN0100','DMF0200',
-          'DMR0200','DML0200','DML0300','DML0400','DCF0100','DCR0100','DCL0100','DCN0100','DYF0100',
-          'DYR0100','DYL0100','DYF0200','DYR0200','DYL0200','DYN0100','DOT0300','DOT0400','DOT0500',
-          'DOT0600','DOT0100','MRF0100','MRL0100','MRF0200','MRL0200','MRF0300','MRL0300','MRF0400',
-          'MRL0400','MCF0200','MCL0200','MRF0500','MPF0100','MPL0100','MPF0200','MFF0100','MFL0100',
-          'MFF0200','MSL0100','MSF0100','MCF0100','MCL0100','MOF0100','MOF0200','MOF0300','MOF0400',
-          'MOF0500','MOF0600','MOF0700','VEG0700','MFF0100','MFL0100','MFF0200','MSL0100','MSF0100',
-          'MOF0500','MOF0600','MOF0700','VEG0700','Sodium (mg)','Refined Grains (ounce equivalents)',
-          'Added Sugars (by Total Sugars) (g)','% Calories from SFA','Energy (kcal)',
-          'Total Polyunsaturated Fatty Acids (PUFA) (g)','Total Monounsaturated Fatty Acids (MUFA) (g)',
-          'Total Saturated Fatty Acids (SFA) (g)']
+           'Total Saturated Fatty Acids (SFA) (g)','FRU0100','FRU0200','DMF0200','DMR0200','DML0200','DML0300','SWT0600','BVS0400','BVS0300','BVS0500','BVS0100','BVS0200','BVS0600','BVS0700', 'SWT0600','SWT0100','SWT0200','SWT0300','SWT0700' , 'SWT0800','SWT0400','SWT0500','DOT0300' , 'DOT0400',
+              'DOT0100','DOT0200','GRR0800' , 'GRS0800',  'GRW0800','GRW0900' ,'GRS0900' , 'GRR0900' , 'GRW1100' , 'GRW1200', 'GRW0400' ,'GRS0400' ,'GRR0400','VEG0800','FMC0100', 'FMC0200','DMF0100','DMR0100','DML0100','DMN0100' ,'DMF0200','DMR0200','DML0200','DOT0500', 'DOT0600','DOT0700', 'DOT0800','GRW0600','GRS0600','GRR0600','GRW0700','GRS0700','GRR0700','GRW1300','GRS1300']
 
     para_dict = {'hei_totveg': {'parameters':[1.1], 'name': 'HEIX1_TOTALVEG'},
              'hei_greensbeans': {'parameters':[0.2], 'name': 'HEIX2_GREEN_AND_BEAN'},
@@ -68,6 +53,30 @@ def main(arglist):
              'hei_SFA': {'parameters':[8,16], 'name': 'HEIX13_SATFATS'},
              'Fats': {'parameters':[1.2,2.5], 'name': 'HEIX9_FATTYACID'},
              'hei_sodium':{'parameters':[1.1,2.0],'name':'HEIX10_SODIUM'}
+            }
+    ped811_dict = {'hei_totveg': {'parameters':[0.1,1.9], 'name': 'HEIX1_TOTALVEG'},
+             'hei_totfruit': {'parameters':[0.1,1.9], 'name': 'HEIX3_TOTALFRUIT'},
+             'hei_wholegrains': {'parameters':[1.0,3.5], 'name': 'HEIX5_WHOLEGRAIN'},
+             'hei_dairy': {'parameters':[1.3], 'name': 'HEIX6_TOTALDAIRY'},
+             'hei_totproteins': {'parameters':[2.5,6.0], 'name': 'HEIX7_TOTPROT'},
+             'hei_refinedgrains': {'parameters':[1.6,3.5], 'name': 'HEIX11_REFINEDGRAIN'},
+             'hei_fruitjuice': {'parameters':[0.1,6.0], 'name': 'HEIX11_FRUITJUICE'},
+             'hei_SSB': {'parameters':[0.1,4], 'name': 'HEIX11_SSB'},
+             'hei_sweets': {'parameters':[0.1,1.0], 'name': 'HEIX11_SWEETS'},
+             'hei_salty': {'parameters':[0.1,1.0], 'name': 'HEIX11_SALTY'},
+             'hei_milk': {'parameters':[20,28], 'name': 'HEIX11_SALTY'},
+            }
+    ped1224_dict = {'hei_totveg': {'parameters':[0.1,7.9], 'name': 'HEIX1_TOTALVEG'},
+             'hei_totfruit': {'parameters':[0.1,7.9], 'name': 'HEIX3_TOTALFRUIT'},
+             'hei_wholegrains': {'parameters':[1.5,5.5], 'name': 'HEIX5_WHOLEGRAIN'},
+             'hei_dairy': {'parameters':[1.3], 'name': 'HEIX6_TOTALDAIRY'},
+             'hei_totproteins': {'parameters':[2.0,3.0], 'name': 'HEIX7_TOTPROT'},
+             'hei_refinedgrains': {'parameters':[0,1.8], 'name': 'HEIX11_REFINEDGRAIN'},
+             'hei_fruitjuice': {'parameters':[4.1,6.0], 'name': 'HEIX11_FRUITJUICE'},
+             'hei_SSB': {'parameters':[0.1,4], 'name': 'HEIX11_SSB'},
+             'hei_sweets': {'parameters':[0.1,1.0], 'name': 'HEIX11_SWEETS'},
+             'hei_salty': {'parameters':[0.1,1.0], 'name': 'HEIX11_SALTY'},
+             'hei_milk': {'parameters':[14,18], 'name': 'HEIX11_SALTY'},
             }
     hei_dict={'hei_totveg':
           ['VEG0100','VEG0200','VEG0300','VEG0400','VEG0800','VEG0450','VEG0700','VEG0600','VEG0900','VEG0500'],
@@ -103,10 +112,30 @@ def main(arglist):
          ['Energy (kcal)'],
          'fats':
          ['Total Polyunsaturated Fatty Acids (PUFA) (g)','Total Monounsaturated Fatty Acids (MUFA) (g)',
-         'Total Saturated Fatty Acids (SFA) (g)']}
+         'Total Saturated Fatty Acids (SFA) (g)'],
+         'fruit_juice_foz':
+          ['FRU0100','FRU0200'],
+          'SSB_foz':['DMF0200','DMR0200','DML0200','DML0300','SWT0600','BVS0400','BVS0300','BVS0500','BVS0100','BVS0200','BVS0600','BVS0700', 'SWT0600'], 
+        'chocolate_candies':['SWT0100'], 
+        'candies':['SWT0200'],
+        'frosting':['SWT0300'],
+        'sweet_sauce':['SWT0700' , 'SWT0800' ],
+        'sugar':['SWT0400' ],
+        'syrups':['SWT0500' ],
+        'Pudding': ['DOT0300' , 'DOT0400'],
+        'icecream':['DOT0100' ],
+        'nondairy_treat':['DOT0200' ],
+        'baked_good':['GRR0800' , 'GRS0800',  'GRW0800' ],
+        'chips':['GRW0900' ,'GRS0900' , 'GRR0900' , 'GRW1100' , 'GRW1200', 'GRW0400' ,'GRS0400' ,'GRR0400' ],
+        'fries':['VEG0800' ],
+        'other_fried':['FMC0100', 'FMC0200' ],
+        'milk':['DMF0100','DMR0100','DML0100','DMN0100' ,'DMF0200','DMR0200','DML0200','DOT0500', 'DOT0600'],
+        'formula_foz':['DOT0700', 'DOT0800' ],
+        'cereal_oz':['GRW0600','GRS0600','GRR0600','GRW0700','GRS0700','GRR0700'],
+        'bbcereal_hcup':['GRW1300','GRS1300']
+             }
 
-    interest = ['Participant ID','Energy (kcal)', 'hei_totveg', 'hei_greensbeans', 'hei_totfruit', 'hei_wholefruit', 'hei_wholegrains',
-            'hei_dairy', 'hei_totproteins', 'hei_seafoodplantprot', 'Total Polyunsaturated Fatty Acids (PUFA) (g)',
+    interest = ['Participant ID','Energy (kcal)', 'hei_totveg', 'hei_greensbeans', 'hei_totfruit', 'hei_wholefruit', 'hei_wholegrains','hei_dairy', 'hei_totproteins', 'hei_seafoodplantprot', 'Total Polyunsaturated Fatty Acids (PUFA) (g)',
             'Total Monounsaturated Fatty Acids (MUFA) (g)', 'Total Saturated Fatty Acids (SFA) (g)',
             'hei_sodium', 'hei_refinedgrains', 'hei_addedsugars', 'ripctsfa','energy','% Calories from SFA']
 
