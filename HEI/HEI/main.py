@@ -54,6 +54,7 @@ def main(arglist):
              'Fats': {'parameters':[1.2,2.5], 'name': 'HEIX9_FATTYACID'},
              'hei_sodium':{'parameters':[1.1,2.0],'name':'HEIX10_SODIUM'}
             }
+
     ped811_dict = {'hei_totveg': {'parameters':[0.1,1.9], 'name': 'HEIX1_TOTALVEG'},
              'hei_totfruit': {'parameters':[0.1,1.9], 'name': 'HEIX3_TOTALFRUIT'},
              'hei_wholegrains': {'parameters':[1.0,3.5], 'name': 'HEIX5_WHOLEGRAIN'},
@@ -66,6 +67,7 @@ def main(arglist):
              'hei_salty': {'parameters':[0.1,1.0], 'name': 'HEIX11_SALTY'},
              'hei_milk': {'parameters':[20,28], 'name': 'HEIX11_SALTY'},
             }
+
     ped1224_dict = {'hei_totveg': {'parameters':[0.1,7.9], 'name': 'HEIX1_TOTALVEG'},
              'hei_totfruit': {'parameters':[0.1,7.9], 'name': 'HEIX3_TOTALFRUIT'},
              'hei_wholegrains': {'parameters':[1.5,5.5], 'name': 'HEIX5_WHOLEGRAIN'},
@@ -78,7 +80,9 @@ def main(arglist):
              'hei_salty': {'parameters':[0.1,1.0], 'name': 'HEIX11_SALTY'},
              'hei_milk': {'parameters':[14,18], 'name': 'HEIX11_SALTY'},
             }
-    hei_dict={'hei_totveg':
+
+    hei_dict={
+          'hei_totveg':
           ['VEG0100','VEG0200','VEG0300','VEG0400','VEG0800','VEG0450','VEG0700','VEG0600','VEG0900','VEG0500'],
           'hei_greensbeans':
           ['VEG0100','VEG0700'],
@@ -112,32 +116,65 @@ def main(arglist):
          ['Energy (kcal)'],
          'fats':
          ['Total Polyunsaturated Fatty Acids (PUFA) (g)','Total Monounsaturated Fatty Acids (MUFA) (g)',
-         'Total Saturated Fatty Acids (SFA) (g)'],
-         'fruit_juice_foz':
-          ['FRU0100','FRU0200'],
-          'SSB_foz':['DMF0200','DMR0200','DML0200','DML0300','SWT0600','BVS0400','BVS0300','BVS0500','BVS0100','BVS0200','BVS0600','BVS0700', 'SWT0600'], 
-        'chocolate_candies':['SWT0100'], 
-        'candies':['SWT0200'],
-        'frosting':['SWT0300'],
-        'sweet_sauce':['SWT0700' , 'SWT0800' ],
-        'sugar':['SWT0400' ],
-        'syrups':['SWT0500' ],
-        'Pudding': ['DOT0300' , 'DOT0400'],
-        'icecream':['DOT0100' ],
-        'nondairy_treat':['DOT0200' ],
-        'baked_good':['GRR0800' , 'GRS0800',  'GRW0800' ],
-        'chips':['GRW0900' ,'GRS0900' , 'GRR0900' , 'GRW1100' , 'GRW1200', 'GRW0400' ,'GRS0400' ,'GRR0400' ],
-        'fries':['VEG0800' ],
-        'other_fried':['FMC0100', 'FMC0200' ],
-        'milk':['DMF0100','DMR0100','DML0100','DMN0100' ,'DMF0200','DMR0200','DML0200','DOT0500', 'DOT0600'],
-        'formula_foz':['DOT0700', 'DOT0800' ],
-        'cereal_oz':['GRW0600','GRS0600','GRR0600','GRW0700','GRS0700','GRR0700'],
-        'bbcereal_hcup':['GRW1300','GRS1300']
-             }
+         'Total Saturated Fatty Acids (SFA) (g)']
+         }
+
+    hei_ped_dict={
+            'hei_fruitjuice':
+            ['FRU0100','FRU0200'],
+            'hei_SSB':
+            ['DMF0200','DMR0200','DML0200','DML0300','SWT0600','BVS0400','BVS0300','BVS0500','BVS0100','BVS0200','BVS0600','BVS0700', 'SWT0600'],
+            'chocolate_candies':
+            ['SWT0100'],
+            'candies':
+            ['SWT0200'],
+            'frosting':
+            ['SWT0300'],
+            'sweet_sauce':
+            ['SWT0700' , 'SWT0800' ],
+            'sugar':
+            ['SWT0400' ],
+            'syrups':
+            ['SWT0500' ],
+            'Pudding':
+            ['DOT0300' , 'DOT0400'],
+            'icecream':
+            ['DOT0100' ],
+            'nondairy_treat':
+            ['DOT0200' ],
+            'baked_good':
+            ['GRR0800' , 'GRS0800',  'GRW0800' ],
+            'chips':
+            ['GRW0900' ,'GRS0900' , 'GRR0900' , 'GRW1100' , 'GRW1200', 'GRW0400' ,'GRS0400' ,'GRR0400' ],
+            'fries':
+            ['VEG0800' ],
+            'other_fried':
+            ['FMC0100', 'FMC0200' ],
+            'milk':
+            ['DMF0100','DMR0100','DML0100','DMN0100' ,'DMF0200','DMR0200','DML0200','DOT0500', 'DOT0600'],
+            'formula_foz':
+            ['DOT0700', 'DOT0800' ],
+            'cereal_oz':
+            ['GRW0600','GRS0600','GRR0600','GRW0700','GRS0700','GRR0700'],
+            'bbcereal_hcup':
+            ['GRW1300','GRS1300']
+            }
+
+    sweet_salty_dict={hei_sweets :
+    ['chocolate_candies','candies','frosting','sweet_sauce','sugar','syrups','Pudding', 'icecream','nondairy_treat','baked_good'],
+    hei_salty :
+    ['chips','other_fried','fries']
+    }
+
+    hei_salty =['chips','other_fried','fries']
 
     interest = ['Participant ID','Energy (kcal)', 'hei_totveg', 'hei_greensbeans', 'hei_totfruit', 'hei_wholefruit', 'hei_wholegrains','hei_dairy', 'hei_totproteins', 'hei_seafoodplantprot', 'Total Polyunsaturated Fatty Acids (PUFA) (g)',
             'Total Monounsaturated Fatty Acids (MUFA) (g)', 'Total Saturated Fatty Acids (SFA) (g)',
             'hei_sodium', 'hei_refinedgrains', 'hei_addedsugars', 'ripctsfa','energy','% Calories from SFA']
+
+    ped_interest = ['Participant ID','Energy (kcal)', 'hei_totveg', 'hei_greensbeans', 'hei_totfruit', 'hei_wholefruit', 'hei_wholegrains','hei_dairy', 'hei_totproteins', 'hei_seafoodplantprot',
+            'hei_refinedgrains', 'hei_addedsugars', 'ripctsfa','energy','chocolate_candies','candies','frosting','sweet_sauce','sugar','syrups','Pudding', 'icecream','nondairy_treat','baked_good',
+            'chips','other_fried','fries']
 
 
  # Find the data
@@ -175,10 +212,14 @@ def main(arglist):
                 HEI.check(para_dict, item, k, key, arglist)
     else:
         x=HEI.file_org(infile, arglist, ped_important)
-        pdb.set_trace()
-        for key, value in x.items():
-            print("this is the key %s"%key)
-            print(value)
+        for key,value in x.items():
+            y=HEI.make_ped_components(hei_dict, value)
+            q=HEI.make_hei(y, sweet_salty_dict)
+            z=HEI.ped_grouper(q, interest)
+            for k, item in z.items():
+                print(k)
+                HEI.check(para_dict, item, k, key, arglist)
+
 
 if __name__ == "__main__":
     #commandline parser

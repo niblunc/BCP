@@ -17,6 +17,18 @@ from zipfile import ZipFile
 import argparse
 import pdb
 
+def cup2oz(cup):
+    oz=cup*8
+    return(oz)
+
+def gram2oz(gram):
+    oz=gram/28.3495
+    return(oz)
+
+def T2oz(T):
+    oz=T/2
+    return(oz)
+
 def file_org(infile, arglist, important):
     # print(infile, arglist, important)
     if arglist['OPTS'] == False:
@@ -112,13 +124,16 @@ def make_components(hei_dict, complete_df):
     for key, value in hei_dict.items():
 #        print(key)
         if key in ['hei_totveg','hei_greensbeans','hei_totfruit', 'hei_wholefruit']:
+            #these are in cups
             x=value
             complete_df[key] = complete_df[x].astype('float').sum(axis=1)
             complete_df[key] = complete_df[key]/2
         if key in ['hei_wholegrains','hei_refinedgrains']:
+            # these are in oz
             x=value
             complete_df[key] = complete_df[x].astype('float')
         if key in ['hei_dairy']:
+            # these are in cups
             x=value[:-1]
             tmp= complete_df[x].astype('float').sum(axis=1)
             y=value[-1]
@@ -128,15 +143,17 @@ def make_components(hei_dict, complete_df):
             else:
                 print('NO DAIRY MISSING DOT0100, needs to be last in list')
         if key in ['hei_totproteins']:
+            # these are in oz
             x=value[:-1]
             tmp= complete_df[x].astype('float').sum(axis=1)
             y=value[-1]
             if y == 'VEG0700':
-                tmp2=complete_df[y].astype('float')*2
+                tmp2=complete_df[y].astype('float')*2 # this is normally 1/2
                 complete_df[key]=tmp+tmp2
             else:
                 print('NO TOTAL PROTEIN MISSING VEG0700, needs to be last in list')
         if key in ['hei_seafoodplantprot']:
+            # these are in oz
             x=value[:-1]
             tmp= complete_df[x].astype('float').sum(axis=1)
             y=value[-1]
@@ -160,6 +177,119 @@ def make_components(hei_dict, complete_df):
             complete_df[key] = complete_df[x].astype('float')/1000
     return(complete_df)
 
+def make_ped_components(hei_dict, hei_ped_dict, complete_df):
+    for key, item in hei_ped_dict.items():
+        # make hei_fruitjuice
+        if key in ['hei_fruitjuice']:
+            #this is in 4floz
+            x=value
+            #this is in floz
+            complete_df[key] = 4*(complete_df[x].astype('float').sum(axis=1))
+        # 'hei_totveg', 'hei_totfruit'
+        if key in ['hei_totveg','hei_greensbeans', 'hei_wholefruit']:
+            #these are in cups
+            x=value
+            complete_df[key] = complete_df[x].astype('float').sum(axis=1)
+            #this is now in oz
+            complete_df[key] = cup2oz(complete_df[key]/2)
+        if key in ['hei_wholegrains','hei_refinedgrains']:
+            # these are in oz
+            x=value
+            complete_df[key] = complete_df[x].astype('float')
+        if key in ['hei_dairy']:
+            # these are in cups
+            x=value[:-1]
+            tmp= complete_df[x].astype('float').sum(axis=1)
+            y=value[-1]
+            if y == 'DOT0100':
+                tmp2=complete_df[y].astype('float')/3
+                # this is in oz
+                complete_df[key]=cup2oz(tmp+tmp2)
+            else:
+                print('NO DAIRY MISSING DOT0100, needs to be last in list')
+        if key in ['hei_totproteins']:
+            # these are in oz
+            x=value[:-1]
+            tmp= complete_df[x].astype('float').sum(axis=1)
+            y=value[-1]
+            if y == 'VEG0700':
+                tmp2=complete_df[y].astype('float')*2 # this is normally 1/2
+                complete_df[key]=tmp+tmp2
+            else:
+                print('NO TOTAL PROTEIN MISSING VEG0700, needs to be last in list')
+        if key in ['hei_seafoodplantprot']:
+            # these are in oz
+            x=value[:-1]
+            tmp= complete_df[x].astype('float').sum(axis=1)
+            y=value[-1]
+            if y == 'VEG0700':
+                tmp2=complete_df[y].astype('float')*2
+                complete_df[key]=tmp+tmp2
+            else:
+                print('NO SEAFOOD AND PLANT PROTEIN MISSING VEG0700, needs to be last in list')
+        if key in ['chocolate_candies']:
+            # this is in 40g
+            x=value
+            # this is in oz
+            tmp= gram2oz(40*(complete_df[x].astype('float').sum(axis=1)))
+        if key in ['candies']:
+            #15g
+            x=value
+            # this is in oz
+            tmp= gram2oz(15*(complete_df[x].astype('float').sum(axis=1)))
+        if key in ['frosting']:
+            #35g
+            x=value
+            # this is in oz
+            tmp= gram2oz(35*(complete_df[x].astype('float').sum(axis=1)))
+        if key in ['sweet_sauce']:
+            #2T
+            x=value
+            # this is in oz
+            tmp= T2oz(complete_df[x].astype('float').sum(axis=1))
+        if key in ['sugar']:
+            #4g
+            x=value
+            tmp= gram2oz(4*(complete_df[x].astype('float').sum(axis=1)))
+        if key in ['syrups']:
+            #1/4 c
+            x=value
+            tmp= cup2oz(.25(complete_df[x].astype('float').sum(axis=1)))
+        if key in ['Pudding']:
+            # 1c
+            x=value
+            tmp= cup2oz(complete_df[x].astype('float').sum(axis=1))
+        if key in ['icecream']:
+            # 1/2c
+            x=value
+            tmp= cup2oz(.5(complete_df[x].astype('float').sum(axis=1)))
+        if key in ['nondairy_treat']:
+            #85g
+            x=value
+            tmp= gram2oz(85*(complete_df[x].astype('float').sum(axis=1)))
+        if key in ['baked_good']:
+            #55g
+            x=value
+            tmp= gram2oz(55*(complete_df[x].astype('float').sum(axis=1)))
+        if key in ['chips','other_fried']:
+            #these are in oz
+            x=value
+            tmp= complete_df[x].astype('float').sum(axis=1)
+        if key in ['fries']:
+            #these are in 70g
+            x=value
+            tmp= gram2oz(70*(complete_df[x].astype('float').sum(axis=1)))
+
+
+def make_hei(complete_df, sweet_salty_dict):
+    for key, value in sweet_salty_dict.items():
+        x=value
+        #this is in floz
+        complete_df[key] = complete_df[x].astype('float').sum(axis=1)
+
+
+
+
 def grouper(complete_df, interest):
     data_dict={}
     dailyhei0409=complete_df[complete_df.columns.intersection(interest)].groupby(['Participant ID']).mean()
@@ -168,8 +298,18 @@ def grouper(complete_df, interest):
     data_dict['dailyhei0409']=dailyhei0409
     return(data_dict)
 
+def ped_grouper(complete_df, ped_interest):
+    data_dict={}
+    dailyhei0409=complete_df[complete_df.columns.intersection(interest)].groupby(['Participant ID']).mean()
+    dailyhei0409['Participant ID'] = dailyhei0409.index
+    data_dict['hei0409']=complete_df
+    data_dict['dailyhei0409']=dailyhei0409
+    return(data_dict)
 
+# https://epi.grants.cancer.gov/hei/developing.html#2010
 def adeq_check(df,inputt, output, parameter):
+    # fruit, vegetables, greens and beans, dairy are in cup/1000cal
+    # grains, protein are in oz
     if inputt in ['hei_totveg','hei_greensbeans', 'hei_totfruit', 'hei_wholefruit', 'hei_totproteins', 'hei_seafoodplantprot']:
         tmp = df[inputt]/df['energy']
         df[output] = [5 if x >= parameter else 5*(x/parameter) for x in tmp]
