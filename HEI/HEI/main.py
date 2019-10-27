@@ -57,12 +57,12 @@ def main(arglist):
 
     ped811_dict = {'hei_vegetables': {'parameters':[0.1,1.9], 'name': 'HEIX1_VEGETABLES'},
              'hei_totfruit': {'parameters':[0.1,1.9], 'name': 'HEIX2_TOTALFRUIT'},
-             'hei_wholegrains': {'parameters':[1.0,3.5,0, 8.0], 'name': 'HEIX3_WHOLEGRAIN'},
+             'hei_wholegrains': {'parameters':[1.0,3.5,0.0 , 8.0], 'name': 'HEIX3_WHOLEGRAIN'},
              'hei_dairy': {'parameters':[20,28,8,35], 'name': 'HEIX4_TOTALDAIRY'},
-             'hei_proteins': {'parameters':[2.5,6.0,0,10], 'name': 'HEIX5_PROTEIN'},
+             'hei_proteins': {'parameters':[2.5,6.0,0,10.0], 'name': 'HEIX5_PROTEIN'},
              'hei_refinedgrains': {'parameters':[1.6,3.5], 'name': 'HEIX6_REFINEDGRAIN'},
              'hei_fruitjuice': {'parameters':[0.1,6.0], 'name': 'HEIX7_FRUITJUICE'},
-             'hei_SSB': {'parameters':[0.1,4], 'name': 'HEIX8_SSB'},
+             'hei_SSB': {'parameters':[0.1,4.0], 'name': 'HEIX8_SSB'},
              'hei_sweets': {'parameters':[0.1,1.0], 'name': 'HEIX9_SWEETS'},
              'hei_salty': {'parameters':[0.1,1.0], 'name': 'HEIX10_SALTY'}
             }
@@ -70,11 +70,11 @@ def main(arglist):
     ped1224_dict = {'hei_vegetables': {'parameters':[0.1,7.9], 'name': 'HEIX1_VEGETABLES'},
              'hei_totfruit': {'parameters':[0.1,7.9], 'name': 'HEIX2_TOTALFRUIT'},
              'hei_wholegrains': {'parameters':[1.5, 5.5, 0, 8.0], 'name': 'HEIX3_WHOLEGRAIN'},
-             'hei_dairy': {'parameters':[14,18,8,24], 'name': 'HEIX4_TOTALDAIRY'},
+             'hei_dairy': {'parameters':[14.0,18.0,8.0,24.0], 'name': 'HEIX4_TOTALDAIRY'},
              'hei_proteins': {'parameters':[2.0,3.0,0,6.0], 'name': 'HEIX5_PROTEIN'},
              'hei_refinedgrains': {'parameters':[1.9, 4.2], 'name': 'HEIX6_REFINEDGRAIN'},
              'hei_fruitjuice': {'parameters':[4.1,6.0], 'name': 'HEIX7_FRUITJUICE'},
-             'hei_SSB': {'parameters':[0.1,4], 'name': 'HEIX8_SSB'},
+             'hei_SSB': {'parameters':[0.1,4.0], 'name': 'HEIX8_SSB'},
              'hei_sweets': {'parameters':[0.1,1.0], 'name': 'HEIX9_SWEETS'},
              'hei_salty': {'parameters':[0.1,1.0], 'name': 'HEIX10_SALTY'},
             }
@@ -207,17 +207,23 @@ def main(arglist):
             y=HEI.make_components(hei_dict, value)
             z=HEI.grouper(y, interest)
             for k, item in z.items():
-                print(k)
+                # print(k)
                 HEI.check(para_dict, item, k, key, arglist)
     else:
-        x=HEI.file_org(infile, arglist, ped_important)
+        x=HEI.file_org(infile, arglist, important)
         for key,value in x.items():
-            y=HEI.make_ped_components(hei_dict, value)
-            q=HEI.make_hei(y, hei_make_dict)
+            y=HEI.make_ped_components(hei_dict,hei_ped_dict, value)
+            print(y.shape)
+            q=HEI.make_hei(y, make_hei_dict)
+            print(q.shape)
             z=HEI.grouper(q, ped_interest)
+            print(z)
             for k, item in z.items():
                 print(k)
-                HEI.check(para_dict, item, k, key, arglist)
+                print(item)
+                print(key)
+                print(arglist)
+                HEI.check(ped811_dict, item, k, key, arglist)
 
 
 if __name__ == "__main__":

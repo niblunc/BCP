@@ -179,13 +179,19 @@ def make_components(hei_dict, complete_df):
     return(complete_df)
 
 def make_ped_components(hei_dict, hei_ped_dict, complete_df):
-    for key, item in hei_ped_dict.items():
+    make_components(hei_dict, complete_df)
+    for key, value in hei_ped_dict.items():
         # make hei_fruitjuice
         if key in ['hei_fruitjuice']:
             #this is in 4floz
             x=value
             #this is in floz
             complete_df[key] = 4*(complete_df[x].astype('float').sum(axis=1))
+        if key in ['hei_SSB']:
+            #this is in 4floz
+            x=value
+            #this is in floz
+            complete_df[key] = 8*(complete_df[x].astype('float').sum(axis=1))
         # 'hei_totveg', 'hei_totfruit'
         if key in ['hei_totveg','hei_greensbeans', 'hei_wholefruit']:
             #these are in cups
@@ -233,60 +239,76 @@ def make_ped_components(hei_dict, hei_ped_dict, complete_df):
             x=value
             # this is in oz
             tmp= gram2oz(40*(complete_df[x].astype('float').sum(axis=1)))
+            complete_df[key]=tmp
         if key in ['candies']:
             #15g
             x=value
             # this is in oz
             tmp= gram2oz(15*(complete_df[x].astype('float').sum(axis=1)))
+            complete_df[key]=tmp
         if key in ['frosting']:
             #35g
             x=value
             # this is in oz
             tmp= gram2oz(35*(complete_df[x].astype('float').sum(axis=1)))
+            complete_df[key]=tmp
         if key in ['sweet_sauce']:
             #2T
             x=value
             # this is in oz
             tmp= T2oz(complete_df[x].astype('float').sum(axis=1))
+            complete_df[key]=tmp
         if key in ['sugar']:
             #4g
             x=value
             tmp= gram2oz(4*(complete_df[x].astype('float').sum(axis=1)))
+            complete_df[key]=tmp
         if key in ['syrups']:
             #1/4 c
             x=value
-            tmp= cup2oz(.25(complete_df[x].astype('float').sum(axis=1)))
+            tmp= cup2oz(.25*(complete_df[x].astype('float').sum(axis=1)))
+            complete_df[key]=tmp
         if key in ['Pudding']:
             # 1c
             x=value
             tmp= cup2oz(complete_df[x].astype('float').sum(axis=1))
+            complete_df[key]=tmp
         if key in ['icecream']:
             # 1/2c
             x=value
-            tmp= cup2oz(.5(complete_df[x].astype('float').sum(axis=1)))
+            tmp= cup2oz(.5*(complete_df[x].astype('float').sum(axis=1)))
+            complete_df[key]=tmp
         if key in ['nondairy_treat']:
             #85g
             x=value
             tmp= gram2oz(85*(complete_df[x].astype('float').sum(axis=1)))
+            complete_df[key]=tmp
         if key in ['baked_good']:
             #55g
             x=value
             tmp= gram2oz(55*(complete_df[x].astype('float').sum(axis=1)))
+            complete_df[key]=tmp
         if key in ['chips','other_fried']:
             #these are in oz
             x=value
             tmp= complete_df[x].astype('float').sum(axis=1)
+            complete_df[key]=tmp
         if key in ['fries']:
             #these are in 70g
             x=value
             tmp= gram2oz(70*(complete_df[x].astype('float').sum(axis=1)))
+            complete_df[key]=tmp
+    return(complete_df)
 
 
 def make_hei(complete_df, make_hei_dict):
+    #print(complete_df)
     for key, value in make_hei_dict.items():
         x=value
-        #this is in floz
+        # print(value)
         complete_df[key] = complete_df[x].astype('float').sum(axis=1)
+    # pdb.set_trace()
+    return(complete_df)
 
 
 def grouper(complete_df, interest):
@@ -299,23 +321,32 @@ def grouper(complete_df, interest):
 
 
 def DQI(df,inputt, output, parameter):
+    # pdb.set_trace()
     # Moderation
+    print(inputt)
     if inputt in ['hei_salty','hei_sweets','hei_SSB','hei_fruitjuice','hei_refinedgrains']:
+        temp=df[inputt]
         MIN=parameter[0]
         MAX=parameter[1]
-        df[output]=[2.5 if MIN < x =< MAX else 0 if x > MAX else 5 for x in temp]
+        print('these are the parameters %f and %f'%(MIN,MAX))
+        pdb.set_trace()
+        df[output]=[2.5 if MIN < x <= MAX else 0 if x > MAX else 5 for x in temp]
     # No limit
     elif inputt in ['hei_totveg', 'hei_wholefruit']:
+        temp=df[inputt]
         MIN=parameter[0]
         MAX=parameter[1]
-        df[output]=[2.5 if MIN < x =< MAX else 0 if x == MIN else 5 for x in temp]
+        df[output]=[2.5 if MIN < x <= MAX else 0 if x == MIN else 5 for x in temp]
     # Upper limit
     elif inputt in ['hei_wholegrains','hei_dairy','hei_proteins']:
+        # pdb.set_trace()
+        temp=df[inputt]
         FARMIN = parameter[0]
         FARMAX = parameter[1]
         MIN = parameter[2]
         MAX = parameter[3]
-        df[output]=[5 if MIN < x =< MAX else 2.5 if MIN < x =< FARMIN or MAX < x <=FARMAX else 0 for x in temp]
+        df[output]=[5 if MIN < x <= MAX else 2.5 if MIN < x <= FARMIN or MAX < x <=FARMAX else 0 for x in temp]
+    return(df)
 
 
 
@@ -377,7 +408,7 @@ def check(x, data, name, option, arglist):
             if key in ['hei_vegetables','hei_totfruit','hei_wholegrains','hei_dairy','hei_proteins','hei_refinedgrains',
             'hei_fruitjuice','hei_SSB','hei_sweets','hei_salty']:
                 DQI(df,key, values['name'], values['parameters'])
-                
+
 
     df['HEI2015_TOTAL_SCORE']=df[df.columns.intersection(toSum)].sum(axis=1)
     print(list(df.columns))
