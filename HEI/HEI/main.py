@@ -55,30 +55,28 @@ def main(arglist):
              'hei_sodium':{'parameters':[1.1,2.0],'name':'HEIX10_SODIUM'}
             }
 
-    ped811_dict = {'hei_totveg': {'parameters':[0.1,1.9], 'name': 'HEIX1_TOTALVEG'},
-             'hei_totfruit': {'parameters':[0.1,1.9], 'name': 'HEIX3_TOTALFRUIT'},
-             'hei_wholegrains': {'parameters':[1.0,3.5], 'name': 'HEIX5_WHOLEGRAIN'},
-             'hei_dairy': {'parameters':[1.3], 'name': 'HEIX6_TOTALDAIRY'},
-             'hei_totproteins': {'parameters':[2.5,6.0], 'name': 'HEIX7_TOTPROT'},
-             'hei_refinedgrains': {'parameters':[1.6,3.5], 'name': 'HEIX11_REFINEDGRAIN'},
-             'hei_fruitjuice': {'parameters':[0.1,6.0], 'name': 'HEIX11_FRUITJUICE'},
-             'hei_SSB': {'parameters':[0.1,4], 'name': 'HEIX11_SSB'},
-             'hei_sweets': {'parameters':[0.1,1.0], 'name': 'HEIX11_SWEETS'},
-             'hei_salty': {'parameters':[0.1,1.0], 'name': 'HEIX11_SALTY'},
-             'hei_milk': {'parameters':[20,28], 'name': 'HEIX11_SALTY'},
+    ped811_dict = {'hei_vegetables': {'parameters':[0.1,1.9], 'name': 'HEIX1_VEGETABLES'},
+             'hei_totfruit': {'parameters':[0.1,1.9], 'name': 'HEIX2_TOTALFRUIT'},
+             'hei_wholegrains': {'parameters':[1.0,3.5,0, 8.0], 'name': 'HEIX3_WHOLEGRAIN'},
+             'hei_dairy': {'parameters':[20,28,8,35], 'name': 'HEIX4_TOTALDAIRY'},
+             'hei_proteins': {'parameters':[2.5,6.0,0,10], 'name': 'HEIX5_PROTEIN'},
+             'hei_refinedgrains': {'parameters':[1.6,3.5], 'name': 'HEIX6_REFINEDGRAIN'},
+             'hei_fruitjuice': {'parameters':[0.1,6.0], 'name': 'HEIX7_FRUITJUICE'},
+             'hei_SSB': {'parameters':[0.1,4], 'name': 'HEIX8_SSB'},
+             'hei_sweets': {'parameters':[0.1,1.0], 'name': 'HEIX9_SWEETS'},
+             'hei_salty': {'parameters':[0.1,1.0], 'name': 'HEIX10_SALTY'}
             }
 
-    ped1224_dict = {'hei_totveg': {'parameters':[0.1,7.9], 'name': 'HEIX1_TOTALVEG'},
-             'hei_totfruit': {'parameters':[0.1,7.9], 'name': 'HEIX3_TOTALFRUIT'},
-             'hei_wholegrains': {'parameters':[1.5,5.5], 'name': 'HEIX5_WHOLEGRAIN'},
-             'hei_dairy': {'parameters':[1.3], 'name': 'HEIX6_TOTALDAIRY'},
-             'hei_totproteins': {'parameters':[2.0,3.0], 'name': 'HEIX7_TOTPROT'},
-             'hei_refinedgrains': {'parameters':[0,1.8], 'name': 'HEIX11_REFINEDGRAIN'},
-             'hei_fruitjuice': {'parameters':[4.1,6.0], 'name': 'HEIX11_FRUITJUICE'},
-             'hei_SSB': {'parameters':[0.1,4], 'name': 'HEIX11_SSB'},
-             'hei_sweets': {'parameters':[0.1,1.0], 'name': 'HEIX11_SWEETS'},
-             'hei_salty': {'parameters':[0.1,1.0], 'name': 'HEIX11_SALTY'},
-             'hei_milk': {'parameters':[14,18], 'name': 'HEIX11_SALTY'},
+    ped1224_dict = {'hei_vegetables': {'parameters':[0.1,7.9], 'name': 'HEIX1_VEGETABLES'},
+             'hei_totfruit': {'parameters':[0.1,7.9], 'name': 'HEIX2_TOTALFRUIT'},
+             'hei_wholegrains': {'parameters':[1.5, 5.5, 0, 8.0], 'name': 'HEIX3_WHOLEGRAIN'},
+             'hei_dairy': {'parameters':[14,18,8,24], 'name': 'HEIX4_TOTALDAIRY'},
+             'hei_proteins': {'parameters':[2.0,3.0,0,6.0], 'name': 'HEIX5_PROTEIN'},
+             'hei_refinedgrains': {'parameters':[1.9, 4.2], 'name': 'HEIX6_REFINEDGRAIN'},
+             'hei_fruitjuice': {'parameters':[4.1,6.0], 'name': 'HEIX7_FRUITJUICE'},
+             'hei_SSB': {'parameters':[0.1,4], 'name': 'HEIX8_SSB'},
+             'hei_sweets': {'parameters':[0.1,1.0], 'name': 'HEIX9_SWEETS'},
+             'hei_salty': {'parameters':[0.1,1.0], 'name': 'HEIX10_SALTY'},
             }
 
     hei_dict={
@@ -160,10 +158,15 @@ def main(arglist):
             ['GRW1300','GRS1300']
             }
 
-    sweet_salty_dict={hei_sweets :
+    make_hei_dict={
+    'hei_sweets' :
     ['chocolate_candies','candies','frosting','sweet_sauce','sugar','syrups','Pudding', 'icecream','nondairy_treat','baked_good'],
-    hei_salty :
-    ['chips','other_fried','fries']
+    'hei_salty' :
+    ['chips','other_fried','fries'],
+    'hei_vegetables':
+    ['hei_totveg', 'hei_greensbeans'],
+    'hei_proteins':
+    ['hei_totproteins','hei_seafoodplantprot']
     }
 
     hei_salty =['chips','other_fried','fries']
@@ -197,10 +200,6 @@ def main(arglist):
                             zipObj.extract(fileName, os.path.join(arglist['BASEPATH'],'temp_txt'))
     infile = os.path.join(arglist['BASEPATH'],'temp_txt')
 
-#Get func-y
-    # print(infile)
-    # print(arglist)
-    # print(important)
     if arglist['CHILD'] == False:
         x=HEI.file_org(infile, arglist, important)
 
@@ -214,8 +213,8 @@ def main(arglist):
         x=HEI.file_org(infile, arglist, ped_important)
         for key,value in x.items():
             y=HEI.make_ped_components(hei_dict, value)
-            q=HEI.make_hei(y, sweet_salty_dict)
-            z=HEI.ped_grouper(q, interest)
+            q=HEI.make_hei(y, hei_make_dict)
+            z=HEI.grouper(q, ped_interest)
             for k, item in z.items():
                 print(k)
                 HEI.check(para_dict, item, k, key, arglist)
