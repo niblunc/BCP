@@ -20,7 +20,6 @@ from functools import lru_cache
 import pdb
 import HEI
 
-@lru_cache(maxsize=24)
 def main(arglist):
     if arglist['SAVE'] == False:
         print('Hi')
@@ -29,7 +28,6 @@ def main(arglist):
     print(arglist)
 
 #    Dictionaries and lists
-
     important=['Participant ID','VEG0100','VEG0200','VEG0300','VEG0400','VEG0800','VEG0450','VEG0700',
            'VEG0600','VEG0900','VEG0500','VEG0100','VEG0700','FRU0100','FRU0200','FRU0300','FRU0400',
            'FRU0500','FRU0600','FRU0700','FRU0300','FRU0400','FRU0500','FRU0600','FRU0700',
@@ -210,7 +208,13 @@ def main(arglist):
             for k, item in z.items():
                 HEI.check(para_dict, item, k, key, arglist)
     else:
-        x=HEI.file_org(infile, arglist, important)
+        a=HEI.file_org(infile, arglist, important)
+        # pdb.set_trace()
+        # a=pd.read_csv('/Users/gracer/Google Drive/BCP/data/Chil_BCP_datasetTOTAL.csv', sep=',')
+        df=a[arglist['OPTS'][0]]
+        # pdb.set_trace()
+        x=HEI.BCP(df, arglist)
+        pdb.set_trace()
         for key,value in x.items():
             print('starting to generate components for %s'%key)
             y=HEI.make_ped_components(hei_dict,hei_ped_dict, value)
@@ -218,13 +222,7 @@ def main(arglist):
             que=HEI.make_hei(y, make_hei_dict)
             z=HEI.grouper(que, ped_interest)
             HEI.check(ped811_dict, z['hei0409'], 'hei0409', key, arglist)
-            # pdb.set_trace()
-            # for k, item in z.items():
-            #     print(k)
-            #     print(item)
-            #     print(key)
-            #     print(arglist)
-            #     HEI.check(ped811_dict, item, k, key, arglist)
+
 
 
 if __name__ == "__main__":
@@ -238,9 +236,9 @@ if __name__ == "__main__":
     parser.add_argument('-options',dest='OPTS', nargs='+',
                         default=False, help='Do you have multiple different 04 and 09 files that need to be kept seperate? Please enter strings that can be searched with (this should be in the file path) no commas')
     parser.add_argument('-child',dest='CHILD', action='store',
-                        default=False, help='Is this pediatric data? If True, then you need the following other files: breastfeeding data')
+                        default=False, help='Is this pediatric data? If True, then you need the following other files in xtra: demographics (with birthday) and then infant feeding data')
     parser.add_argument('-xtra', dest='XTRA', nargs='+',
-                        default=False, help='This should be a path to breastfeeding data for the child')
+                        default=False, help='FIRST demographics (with birthday) and SECOND infant feeding data')
     parser.add_argument('-save',dest='SAVE', action='store',
                         default=False, help='Path to save output, if not filled in will default to the basepath')
 

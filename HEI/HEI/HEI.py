@@ -17,6 +17,78 @@ warnings.filterwarnings('ignore')
 from zipfile import ZipFile
 import argparse
 import pdb
+from datetime import datetime
+def BCP(diet_df, arglist):
+    #read in the data
+    df1=os.path.join(arglist['BASEPATH'],arglist['XTRA'][0])
+    df2=os.path.join(arglist['BASEPATH'],arglist['XTRA'][1])
+    print(df1)
+    demo_df=pd.read_csv(df2, sep=',')
+    infant_df=pd.read_csv(df1, sep=',', encoding='latin1')
+    #refactor
+    infant_df['breastfed']=infant_df['breastfed'].replace({'no': 0, 'yes': 1})
+    infant_df['any_formula']=infant_df['any_formula'].replace({'no': 0, 'yes': 1,'NaN':'NA'})
+    infant_df['regular_formula']=infant_df['regular_formula'].replace({'no': 0, 'yes': 1,'NaN':'NA','not_answered':'NA'})
+    infant_df['age_fed_dropdown']=infant_df['age_fed_dropdown'].replace({'no': 0, 'yes': 1,'NaN':'NA','not_answered':'NA','never_not_yet':0})
+    #check similarity
+    b=list(demo_df['PSCID'])
+    a=list(infant_df['PSCID'])
+
+    common=list(set(a) & set(b))
+    #find unique elements, set the index to be the ID, make into dictionary
+    demo_df=demo_df[demo_df['PSCID'].isin(common)]
+    infant_df=infant_df[infant_df['PSCID'].isin(common)]
+
+    infant_df_un=infant_df.drop_duplicates(['PSCID'])
+    infant_df_un=infant_df_un.set_index('CandID')
+    infant_dict=infant_df_un.to_dict('index')
+    infant_dict = {str(k):v for k,v in infant_dict.items()}
+
+    demo_df_un=demo_df.drop_duplicates(['PSCID'])
+    demo_df_un=demo_df_un.set_index(str('CandID'))
+    demo_dict=demo_df_un.to_dict('index')
+    demo_dict = {str(k):v for k,v in demo_dict.items()}
+    alldiet_dict=diet_df.to_dict('index')
+    # test=[item['Participant ID'] for key, item in alldiet_dict.items()]
+    # id=list(demo_dict.keys())
+    # ids=[str(i) for i in ids]
+    # pdb.set_trace()
+    # Get the age in months of each recall
+    for key, item in alldiet_dict.items():
+        print('this is the key %s'%key)
+        print(item['Date of Intake'])
+        print(item['Participant ID'])
+        ID = item['Participant ID']
+        # pdb.set_trace()
+        date=datetime.strptime(item['Date of Intake'], '%m/%d/%Y')
+        if ID in demo_dict:
+            print('present!')
+            birthday=datetime.strptime(demo_dict[ID]['DoB'], '%m/%d/%y')
+            age = (date-birthday)
+            print('this is the number of days %s'%age.days)
+            alldiet_dict[key]['age']=float(age.days)/12
+        else:
+            print('NOPE')
+    # Sort the data by age at input (within 1 year of diet recall)
+    data = {}
+    count=0
+    for key, item in alldiet_dict.items():
+        ID = item['Participant ID']
+        if ID in demo_dict and infant_dict:
+            print('GOT IT!')
+            if (abs(item['age'] - infant_dict[ID]['Candidate_Age'])) < 12:
+                print('SAME YEAR %s'%ID)
+                count=count+1
+                data[count]={'ID':ID,'demo':demo_dict[ID], 'infant':infant_dict[ID], 'diet':item}
+        else:
+            print('NO DICE')
+    pdb.set_trace()
+    return(data)
+
+#def infant():
+
+
+
 
 def cup2oz(cup):
     oz=cup*8
