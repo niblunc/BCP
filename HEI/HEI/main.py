@@ -211,14 +211,13 @@ def main(arglist):
         a=HEI.file_org(infile, arglist, important)
         df=a[arglist['OPTS'][0]]
         x=HEI.BCP(df, arglist)
-        pdb.set_trace()
-        for key,value in x.items():
-            print('starting to generate components for %s'%key)
-            y=HEI.make_ped_components(hei_dict,hei_ped_dict, value)
-            print('starting to generate hei groups for %s'%key)
-            que=HEI.make_hei(y, make_hei_dict)
-            z=HEI.grouper(que, ped_interest)
-            HEI.check(ped811_dict, z['hei0409'], 'hei0409', key, arglist)
+        print('starting to generate components')
+        y=HEI.make_ped_components(hei_dict,hei_ped_dict, x)
+        print('starting to generate hei groups')
+        que=HEI.make_hei(y, make_hei_dict)
+        z=HEI.grouper(que, ped_interest)
+        key='child'
+        HEI.check(ped811_dict, z['hei0409'], 'hei0409', key, arglist)
 
 
 

@@ -390,11 +390,12 @@ def make_ped_components(hei_dict, hei_ped_dict, complete_df):
 
 
 def make_hei(complete_df, make_hei_dict):
-    #print(complete_df)
-    for key, value in make_hei_dict.items():
+    print('START')
+    print(make_hei_dict)
+    for k, value in make_hei_dict.items():
         x=value
         # print(value)
-        complete_df[key] = complete_df[x].astype('float').sum(axis=1)
+        complete_df[k] = complete_df[x].astype('float').sum(axis=1)
     # pdb.set_trace()
     return(complete_df)
 
