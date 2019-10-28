@@ -12,9 +12,15 @@ import warnings
 warnings.filterwarnings('ignore')
 from zipfile import ZipFile
 import argparse
+import urllib.error
+import urllib.request
+
+from functools import lru_cache
+
 import pdb
 import HEI
 
+@lru_cache(maxsize=24)
 def main(arglist):
     if arglist['SAVE'] == False:
         print('Hi')
