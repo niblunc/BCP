@@ -101,7 +101,12 @@ def BCP(diet_df, arglist):
 
     return(DF)
 
-#def infant():
+def splitter(DF):
+    DF_child=DF.query('age >= 12')
+    DF_young=DF.query('age < 12 and age >= 8')
+    DF_infant=DF.query(' age < 8')
+    df={'DF_child':DF_child, 'DF_young':DF_young, 'DF_infant':DF_infant}
+    return(df)
 
 
 
@@ -409,10 +414,20 @@ def grouper(complete_df, interest):
     return(data_dict)
 
 
-def DQI(df,inputt, output, parameter):
+# df=data
+# toSum=['HEIX1_VEGETABLES','HEIX2_TOTALFRUIT' , 'HEIX3_WHOLEGRAIN' , 'HEIX4_TOTALDAIRY' ,
+#        'HEIX5_PROTEIN' , 'HEIX6_REFINEDGRAIN' , 'HEIX7_FRUITJUICE' , 'HEIX8_SSB', 'HEIX9_SWEETS',
+#        'HEIX10_SALTY']
+# for key,values in dic.items():
+#     print('Calculating score for %s'%key)
+#     DQI(df,key,values)
+
+def DQI(df, inputt, output, parameter):
+    #inputt, output, parameter
     if inputt in ['hei_salty','hei_sweets','hei_SSB','hei_fruitjuice','hei_refinedgrains']:
         print('now calculating %s'%output)
         temp=df[inputt]
+
         MIN=parameter[0]
         MAX=parameter[1]
         # print('these are the parameters %f and %f'%(MIN,MAX))
@@ -471,13 +486,13 @@ def mod_check(df,inputt, output, parameter):
         tmp= df['% Calories from SFA']
         df[output] = [0 if x > parameter[1] else 10 if x < parameter[0] else 10-(10*((x-parameter[0])/(parameter[1]-parameter[0]))) for x in tmp]
 
-def check(x, data, name, option, arglist):
+def check(dic, data, name, option, arglist):
     if arglist['CHILD'] == False:
         df=data
         toSum=['HEIX1_TOTALVEG','HEIX2_GREEN_AND_BEAN' , 'HEIX3_TOTALFRUIT' , 'HEIX4_WHOLEFRUIT' ,
                'HEIX5_WHOLEGRAIN' , 'HEIX6_TOTALDAIRY' , 'HEIX7_TOTPROT' , 'HEIX8_SEAPLANT_PROT' , 'HEIX9_FATTYACID' ,
                'HEIX10_SODIUM' , 'HEIX11_REFINEDGRAIN' , 'HEIX12_ADDEDSUGARS' , 'HEIX13_SATFATS']
-        for key,values in x.items():
+        for key,values in dic.items():
             print('Calculating score for %s'%key)
             if key in ['hei_totveg','hei_greensbeans', 'hei_totfruit', 'hei_wholefruit', 'hei_totproteins', 'hei_seafoodplantprot',
                         'hei_wholegrains', 'hei_dairy','Fats']:
@@ -492,7 +507,7 @@ def check(x, data, name, option, arglist):
         toSum=['HEIX1_VEGETABLES','HEIX2_TOTALFRUIT' , 'HEIX3_WHOLEGRAIN' , 'HEIX4_TOTALDAIRY' ,
                'HEIX5_PROTEIN' , 'HEIX6_REFINEDGRAIN' , 'HEIX7_FRUITJUICE' , 'HEIX8_SSB', 'HEIX9_SWEETS',
                'HEIX10_SALTY']
-        for key,values in x.items():
+        for key,values in dic.items():
             if key in ['hei_vegetables','hei_totfruit','hei_wholegrains','hei_dairy','hei_proteins','hei_refinedgrains',
             'hei_fruitjuice','hei_SSB','hei_sweets','hei_salty']:
                 print('Calculating score for %s'%key)

@@ -82,6 +82,21 @@ def main(arglist):
              'hei_sweets': {'parameters':[0.1,1.0], 'name': 'HEIX9_SWEETS'},
              'hei_salty': {'parameters':[0.1,1.0], 'name': 'HEIX10_SALTY'},
             }
+    ped_dict={'young': ped811_dict,
+    'child':ped1224_dict
+    }
+    # ped_dict = {
+    # 'hei_vegetables': {'young':{'parameters':[0.1,1.9], 'name': 'HEIX1_VEGETABLES'} , 'child': {'parameters':[0.1,7.9], 'name': 'HEIX1_VEGETABLES'}},
+    # 'hei_totfruit':{'young': {'parameters':[0.1,1.9], 'name': 'HEIX2_TOTALFRUIT'}, 'child': {'parameters':[0.1,7.9], 'name': 'HEIX2_TOTALFRUIT'}} ,
+    # 'hei_wholegrains': {'young':{'parameters':[1.0,3.5,0.0 , 8.0], 'name': 'HEIX3_WHOLEGRAIN'} , 'child':{'parameters':[1.5, 5.5, 0, 8.0], 'name': 'HEIX3_WHOLEGRAIN'}},
+    # 'hei_dairy': {'young':{'parameters':[20,28,8,35], 'name': 'HEIX4_TOTALDAIRY'} , 'child':{'parameters':[14.0,18.0,8.0,24.0], 'name': 'HEIX4_TOTALDAIRY'}},
+    # 'hei_proteins': {'young':{'parameters':[2.5,6.0,0,10.0], 'name': 'HEIX5_PROTEIN'} , 'child':{'parameters':[2.0,3.0,0,6.0], 'name': 'HEIX5_PROTEIN'}},
+    # 'hei_refinedgrains':{'young': {'parameters':[1.6,3.5], 'name': 'HEIX6_REFINEDGRAIN'}, 'child':{'parameters':[1.9, 4.2], 'name': 'HEIX6_REFINEDGRAIN'}} ,
+    # 'hei_fruitjuice':{'young': {'parameters':[0.1,6.0], 'name': 'HEIX7_FRUITJUICE'}, 'child':{'parameters':[4.1,6.0], 'name': 'HEIX7_FRUITJUICE'}} ,
+    # 'hei_SSB':{'young':{'parameters':[0.1,4.0], 'name': 'HEIX8_SSB'}, 'child':{'parameters':[0.1,4.0], 'name': 'HEIX8_SSB'}} ,
+    # 'hei_sweets':{'young':{'parameters':[0.1,1.0], 'name': 'HEIX9_SWEETS'} , 'child':{'parameters':[0.1,1.0], 'name': 'HEIX9_SWEETS'}} ,
+    # 'hei_salty':{'young':  {'parameters':[0.1,1.0], 'name': 'HEIX10_SALTY'}, 'child':{'parameters':[0.1,1.0], 'name': 'HEIX10_SALTY'}}
+    # }
 
     hei_dict={
           'hei_totveg':
@@ -217,8 +232,14 @@ def main(arglist):
         que=HEI.make_hei(y, make_hei_dict)
         z=HEI.grouper(que, ped_interest)
         key='child'
-        HEI.check(ped811_dict, z['hei0409'], 'hei0409', key, arglist)
-
+        df=HEI.splitter(z['hei0409'])
+        for key, value in df.items():
+            if key == 'DF_child':
+                HEI.check(ped_dict['child'], value, 'hei0409', key, arglist)
+            elif key == 'DF_young':
+                HEI.check(ped_dict['young'], value, 'hei0409', key, arglist)
+            else:
+                print('im baby')
 
 
 if __name__ == "__main__":
