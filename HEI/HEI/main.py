@@ -209,10 +209,7 @@ def main(arglist):
                 HEI.check(para_dict, item, k, key, arglist)
     else:
         a=HEI.file_org(infile, arglist, important)
-        # pdb.set_trace()
-        # a=pd.read_csv('/Users/gracer/Google Drive/BCP/data/Chil_BCP_datasetTOTAL.csv', sep=',')
         df=a[arglist['OPTS'][0]]
-        # pdb.set_trace()
         x=HEI.BCP(df, arglist)
         pdb.set_trace()
         for key,value in x.items():

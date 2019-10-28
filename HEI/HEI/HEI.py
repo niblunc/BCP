@@ -18,6 +18,7 @@ from zipfile import ZipFile
 import argparse
 import pdb
 from datetime import datetime
+
 def BCP(diet_df, arglist):
     #read in the data
     df1=os.path.join(arglist['BASEPATH'],arglist['XTRA'][0])
@@ -49,10 +50,7 @@ def BCP(diet_df, arglist):
     demo_dict=demo_df_un.to_dict('index')
     demo_dict = {str(k):v for k,v in demo_dict.items()}
     alldiet_dict=diet_df.to_dict('index')
-    # test=[item['Participant ID'] for key, item in alldiet_dict.items()]
-    # id=list(demo_dict.keys())
-    # ids=[str(i) for i in ids]
-    # pdb.set_trace()
+
     # Get the age in months of each recall
     for key, item in alldiet_dict.items():
         print('this is the key %s'%key)
@@ -82,8 +80,26 @@ def BCP(diet_df, arglist):
                 data[count]={'ID':ID,'demo':demo_dict[ID], 'infant':infant_dict[ID], 'diet':item}
         else:
             print('NO DICE')
-    pdb.set_trace()
-    return(data)
+    # Make this into a single dataset
+    columns = list(data[1]['demo'].keys())
+    df_ = pd.DataFrame(index=[0], columns=columns)
+    cols=list(data[1].keys())
+    DATA_dict={}
+    for i in cols[1:]:
+        print(i)
+        df_ = pd.DataFrame(index=[0], columns=columns)
+        for k,v in data.items():
+            tmp=pd.DataFrame(data[k][i], index=[data[k]['ID']])
+            df_=pd.concat([df_,tmp], axis=0)
+        DATA_dict[i]=df_
+
+    DF=DATA_dict['diet'].merge(DATA_dict['infant'].drop_duplicates(), left_index=True, right_index=True)
+    DF=DF.merge(DATA_dict['demo'].drop_duplicates(), left_index=True, right_index=True)
+
+    concat_filepath = os.path.join(arglist['SAVE'],'test_childimd_datasetTOTAL.csv')
+    DF.to_csv(concat_filepath, index=True, sep=",", header=True)
+
+    return(DF)
 
 #def infant():
 
