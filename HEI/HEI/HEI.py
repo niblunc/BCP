@@ -109,8 +109,6 @@ def splitter(DF):
     return(df)
 
 
-
-
 def cup2oz(cup):
     oz=cup*8
     return(oz)
@@ -271,8 +269,8 @@ def make_components(hei_dict, complete_df):
             complete_df[key] = complete_df[x].astype('float')/1000
     return(complete_df)
 
-def make_ped_components(hei_dict, hei_ped_dict, complete_df):
-    make_components(hei_dict, complete_df)
+def make_ped_components(hei_ped_dict, complete_df):
+#    make_components(hei_dict, complete_df)
     for key, value in hei_ped_dict.items():
         # make hei_fruitjuice
         if key in ['hei_fruitjuice']:
@@ -391,6 +389,9 @@ def make_ped_components(hei_dict, hei_ped_dict, complete_df):
             x=value
             tmp= gram2oz(70*(complete_df[x].astype('float').sum(axis=1)))
             complete_df[key]=tmp
+        if key in ['formula_foz']:
+            x=value
+            complete_df[key] = 5*(complete_df[x].astype('float').sum(axis=1))
     return(complete_df)
 
 
@@ -399,9 +400,7 @@ def make_hei(complete_df, make_hei_dict):
     print(make_hei_dict)
     for k, value in make_hei_dict.items():
         x=value
-        # print(value)
         complete_df[k] = complete_df[x].astype('float').sum(axis=1)
-    # pdb.set_trace()
     return(complete_df)
 
 
@@ -452,6 +451,11 @@ def DQI(df, inputt, output, parameter):
         df[output]=[5 if MIN < x <= MAX else 2.5 if MIN < x <= FARMIN or MAX < x <=FARMAX else 0 for x in temp]
     return(df)
 
+def DQI_BF(df, output, age_group):
+    if age_group == 'infant':
+        df[output]=[15 if row['four_month_ratio'] == 'exclusively_breastfed' else 5 if row['four_month_ratio'] == 'exclusively_formula' else 10 for index, row in df.iterrows()]
+    else:
+        df[output]=[10 if row['age_stop'] == False and row['breastfed'] == 1 else 0 for index, row in df.iterrows()]
 
 
 # https://epi.grants.cancer.gov/hei/developing.html#2010

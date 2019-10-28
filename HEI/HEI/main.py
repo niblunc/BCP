@@ -41,8 +41,13 @@ def main(arglist):
            'MOF0500','MOF0600','MOF0700','VEG0700','Sodium (mg)','Refined Grains (ounce equivalents)',
            'Added Sugars (by Total Sugars) (g)','% Calories from SFA','Energy (kcal)',
            'Total Polyunsaturated Fatty Acids (PUFA) (g)','Total Monounsaturated Fatty Acids (MUFA) (g)',
-           'Total Saturated Fatty Acids (SFA) (g)','FRU0100','FRU0200','DMF0200','DMR0200','DML0200','DML0300','SWT0600','BVS0400','BVS0300','BVS0500','BVS0100','BVS0200','BVS0600','BVS0700', 'SWT0600','SWT0100','SWT0200','SWT0300','SWT0700' , 'SWT0800','SWT0400','SWT0500','DOT0300' , 'DOT0400',
-              'DOT0100','DOT0200','GRR0800' , 'GRS0800',  'GRW0800','GRW0900' ,'GRS0900' , 'GRR0900' , 'GRW1100' , 'GRW1200', 'GRW0400' ,'GRS0400' ,'GRR0400','VEG0800','FMC0100', 'FMC0200','DMF0100','DMR0100','DML0100','DMN0100' ,'DMF0200','DMR0200','DML0200','DOT0500', 'DOT0600','DOT0700', 'DOT0800','GRW0600','GRS0600','GRR0600','GRW0700','GRS0700','GRR0700','GRW1300','GRS1300']
+           'Total Saturated Fatty Acids (SFA) (g)','FRU0100','FRU0200','DMF0200','DMR0200','DML0200','DML0300',
+           'SWT0600','BVS0400','BVS0300','BVS0500','BVS0100','BVS0200','BVS0600','BVS0700', 'SWT0600','SWT0100',
+           'SWT0200','SWT0300','SWT0700' , 'SWT0800','SWT0400','SWT0500','DOT0300' , 'DOT0400',
+           'DOT0100','DOT0200','GRR0800' , 'GRS0800',  'GRW0800','GRW0900' ,'GRS0900' , 'GRR0900' ,
+           'GRW1100' , 'GRW1200', 'GRW0400' ,'GRS0400' ,'GRR0400','VEG0800','FMC0100', 'FMC0200','DMF0100',
+           'DMR0100','DML0100','DMN0100' ,'DMF0200','DMR0200','DML0200','DOT0500', 'DOT0600','DOT0700',
+           'DOT0800','GRW0600','GRS0600','GRR0600','GRW0700','GRS0700','GRR0700','GRW1300','GRS1300']
 
     para_dict = {'hei_totveg': {'parameters':[1.1], 'name': 'HEIX1_TOTALVEG'},
              'hei_greensbeans': {'parameters':[0.2], 'name': 'HEIX2_GREEN_AND_BEAN'},
@@ -59,44 +64,49 @@ def main(arglist):
              'hei_sodium':{'parameters':[1.1,2.0],'name':'HEIX10_SODIUM'}
             }
 
-    ped811_dict = {'hei_vegetables': {'parameters':[0.1,1.9], 'name': 'HEIX1_VEGETABLES'},
-             'hei_totfruit': {'parameters':[0.1,1.9], 'name': 'HEIX2_TOTALFRUIT'},
-             'hei_wholegrains': {'parameters':[1.0,3.5,0.0 , 8.0], 'name': 'HEIX3_WHOLEGRAIN'},
-             'hei_dairy': {'parameters':[20,28,8,35], 'name': 'HEIX4_TOTALDAIRY'},
-             'hei_proteins': {'parameters':[2.5,6.0,0,10.0], 'name': 'HEIX5_PROTEIN'},
-             'hei_refinedgrains': {'parameters':[1.6,3.5], 'name': 'HEIX6_REFINEDGRAIN'},
-             'hei_fruitjuice': {'parameters':[0.1,6.0], 'name': 'HEIX7_FRUITJUICE'},
-             'hei_SSB': {'parameters':[0.1,4.0], 'name': 'HEIX8_SSB'},
-             'hei_sweets': {'parameters':[0.1,1.0], 'name': 'HEIX9_SWEETS'},
-             'hei_salty': {'parameters':[0.1,1.0], 'name': 'HEIX10_SALTY'}
+    ped811_dict = {
+        'hei_vegetables': {'parameters':[0.1,1.9], 'name': 'HEIX1_VEGETABLES'},
+        'hei_totfruit': {'parameters':[0.1,1.9], 'name': 'HEIX2_TOTALFRUIT'},
+        'hei_wholegrains': {'parameters':[1.0,3.5,0.0 , 8.0], 'name': 'HEIX3_WHOLEGRAIN'},
+        'hei_dairy': {'parameters':[20,28,8,35], 'name': 'HEIX4_TOTALDAIRY'},
+        'hei_proteins': {'parameters':[2.5,6.0,0,10.0], 'name': 'HEIX5_PROTEIN'},
+        'hei_refinedgrains': {'parameters':[1.6,3.5], 'name': 'HEIX6_REFINEDGRAIN'},
+        'hei_fruitjuice': {'parameters':[0.1,6.0], 'name': 'HEIX7_FRUITJUICE'},
+        'hei_SSB': {'parameters':[0.1,4.0], 'name': 'HEIX8_SSB'},
+        'hei_sweets': {'parameters':[0.1,1.0], 'name': 'HEIX9_SWEETS'},
+        'hei_salty': {'parameters':[0.1,1.0], 'name': 'HEIX10_SALTY'}
             }
 
-    ped1224_dict = {'hei_vegetables': {'parameters':[0.1,7.9], 'name': 'HEIX1_VEGETABLES'},
-             'hei_totfruit': {'parameters':[0.1,7.9], 'name': 'HEIX2_TOTALFRUIT'},
-             'hei_wholegrains': {'parameters':[1.5, 5.5, 0, 8.0], 'name': 'HEIX3_WHOLEGRAIN'},
-             'hei_dairy': {'parameters':[14.0,18.0,8.0,24.0], 'name': 'HEIX4_TOTALDAIRY'},
-             'hei_proteins': {'parameters':[2.0,3.0,0,6.0], 'name': 'HEIX5_PROTEIN'},
-             'hei_refinedgrains': {'parameters':[1.9, 4.2], 'name': 'HEIX6_REFINEDGRAIN'},
-             'hei_fruitjuice': {'parameters':[4.1,6.0], 'name': 'HEIX7_FRUITJUICE'},
-             'hei_SSB': {'parameters':[0.1,4.0], 'name': 'HEIX8_SSB'},
-             'hei_sweets': {'parameters':[0.1,1.0], 'name': 'HEIX9_SWEETS'},
-             'hei_salty': {'parameters':[0.1,1.0], 'name': 'HEIX10_SALTY'},
+    ped1224_dict = {
+        'hei_vegetables': {'parameters':[0.1,7.9], 'name': 'HEIX1_VEGETABLES'},
+        'hei_totfruit': {'parameters':[0.1,7.9], 'name': 'HEIX2_TOTALFRUIT'},
+        'hei_wholegrains': {'parameters':[1.5, 5.5, 0, 8.0], 'name': 'HEIX3_WHOLEGRAIN'},
+        'hei_dairy': {'parameters':[14.0,18.0,8.0,24.0], 'name': 'HEIX4_TOTALDAIRY'},
+        'hei_proteins': {'parameters':[2.0,3.0,0,6.0], 'name': 'HEIX5_PROTEIN'},
+        'hei_refinedgrains': {'parameters':[1.9, 4.2], 'name': 'HEIX6_REFINEDGRAIN'},
+        'hei_fruitjuice': {'parameters':[4.1,6.0], 'name': 'HEIX7_FRUITJUICE'},
+        'hei_SSB': {'parameters':[0.1,4.0], 'name': 'HEIX8_SSB'},
+        'hei_sweets': {'parameters':[0.1,1.0], 'name': 'HEIX9_SWEETS'},
+        'hei_salty': {'parameters':[0.1,1.0], 'name': 'HEIX10_SALTY'}
             }
-    ped_dict={'young': ped811_dict,
-    'child':ped1224_dict
+
+    ped08_dict = {
+        'hei_vegetables': {'parameters':[0], 'name': 'HEIX1_VEGETABLES'},
+        'hei_totfruit': {'parameters':[0], 'name': 'HEIX2_TOTALFRUIT'},
+        'hei_wholegrains': {'parameters':[0], 'name': 'HEIX3_WHOLEGRAIN'},
+        'hei_dairy': {'parameters':[0], 'name': 'HEIX4_TOTALDAIRY'},
+        'hei_proteins': {'parameters':[0], 'name': 'HEIX5_PROTEIN'},
+        'hei_refinedgrains': {'parameters':[0], 'name': 'HEIX6_REFINEDGRAIN'},
+        'hei_fruitjuice': {'parameters':[0], 'name': 'HEIX7_FRUITJUICE'},
+        'hei_SSB': {'parameters':[0], 'name': 'HEIX8_SSB'},
+        'hei_sweets': {'parameters':[0], 'name': 'HEIX9_SWEETS'},
+        'hei_salty': {'parameters':[0], 'name': 'HEIX10_SALTY'}
     }
-    # ped_dict = {
-    # 'hei_vegetables': {'young':{'parameters':[0.1,1.9], 'name': 'HEIX1_VEGETABLES'} , 'child': {'parameters':[0.1,7.9], 'name': 'HEIX1_VEGETABLES'}},
-    # 'hei_totfruit':{'young': {'parameters':[0.1,1.9], 'name': 'HEIX2_TOTALFRUIT'}, 'child': {'parameters':[0.1,7.9], 'name': 'HEIX2_TOTALFRUIT'}} ,
-    # 'hei_wholegrains': {'young':{'parameters':[1.0,3.5,0.0 , 8.0], 'name': 'HEIX3_WHOLEGRAIN'} , 'child':{'parameters':[1.5, 5.5, 0, 8.0], 'name': 'HEIX3_WHOLEGRAIN'}},
-    # 'hei_dairy': {'young':{'parameters':[20,28,8,35], 'name': 'HEIX4_TOTALDAIRY'} , 'child':{'parameters':[14.0,18.0,8.0,24.0], 'name': 'HEIX4_TOTALDAIRY'}},
-    # 'hei_proteins': {'young':{'parameters':[2.5,6.0,0,10.0], 'name': 'HEIX5_PROTEIN'} , 'child':{'parameters':[2.0,3.0,0,6.0], 'name': 'HEIX5_PROTEIN'}},
-    # 'hei_refinedgrains':{'young': {'parameters':[1.6,3.5], 'name': 'HEIX6_REFINEDGRAIN'}, 'child':{'parameters':[1.9, 4.2], 'name': 'HEIX6_REFINEDGRAIN'}} ,
-    # 'hei_fruitjuice':{'young': {'parameters':[0.1,6.0], 'name': 'HEIX7_FRUITJUICE'}, 'child':{'parameters':[4.1,6.0], 'name': 'HEIX7_FRUITJUICE'}} ,
-    # 'hei_SSB':{'young':{'parameters':[0.1,4.0], 'name': 'HEIX8_SSB'}, 'child':{'parameters':[0.1,4.0], 'name': 'HEIX8_SSB'}} ,
-    # 'hei_sweets':{'young':{'parameters':[0.1,1.0], 'name': 'HEIX9_SWEETS'} , 'child':{'parameters':[0.1,1.0], 'name': 'HEIX9_SWEETS'}} ,
-    # 'hei_salty':{'young':  {'parameters':[0.1,1.0], 'name': 'HEIX10_SALTY'}, 'child':{'parameters':[0.1,1.0], 'name': 'HEIX10_SALTY'}}
-    # }
+    ped_dict={'young': ped811_dict,
+        'child':ped1224_dict,
+        'infant':ped08_dict
+    }
+
 
     hei_dict={
           'hei_totveg':
@@ -136,7 +146,33 @@ def main(arglist):
          'Total Saturated Fatty Acids (SFA) (g)']
          }
 
-    hei_ped_dict={
+    hei_ped_dict={'hei_totveg':
+            ['VEG0100','VEG0200','VEG0300','VEG0400','VEG0800','VEG0450','VEG0700','VEG0600','VEG0900','VEG0500'],
+            'hei_greensbeans':
+            ['VEG0100','VEG0700'],
+            'hei_totfruit':
+            ['FRU0100','FRU0200','FRU0300','FRU0400','FRU0500','FRU0600','FRU0700'],
+            'hei_wholefruit':
+            ['FRU0300','FRU0400','FRU0500','FRU0600','FRU0700'],
+            'hei_wholegrains':
+            ['Whole Grains (ounce equivalents)'],
+            'hei_dairy':
+            ['DMF0100','DMR0100','DML0100','DMN0100','DMF0200','DMR0200','DML0200',
+                         'DML0300','DML0400','DCF0100','DCR0100','DCL0100','DCN0100','DYF0100',
+                         'DYR0100','DYL0100','DYF0200','DYR0200','DYL0200','DYN0100',
+                         'DOT0300','DOT0400','DOT0500','DOT0600','DOT0100'],
+            'hei_totproteins':
+            ['MRF0100','MRL0100','MRF0200','MRL0200','MRF0300','MRL0300','MRF0400',
+                               'MRL0400','MCF0200','MCL0200','MRF0500','MPF0100','MPL0100','MPF0200',
+                               'MFF0100','MFL0100','MFF0200','MSL0100',
+                               'MSF0100','MCF0100','MCL0100','MOF0100','MOF0200','MOF0300','MOF0400','MOF0500',
+                               'MOF0600','MOF0700','VEG0700'],
+            'hei_seafoodplantprot':
+            ['MFF0100','MFL0100','MFF0200','MSL0100','MSF0100','MOF0500','MOF0600','MOF0700','VEG0700'],
+            'hei_refinedgrains':
+            ['Refined Grains (ounce equivalents)'],
+           'energy':
+           ['Energy (kcal)'],
             'hei_fruitjuice':
             ['FRU0100','FRU0200'],
             'hei_SSB':
@@ -170,7 +206,7 @@ def main(arglist):
             'milk':
             ['DMF0100','DMR0100','DML0100','DMN0100' ,'DMF0200','DMR0200','DML0200','DOT0500', 'DOT0600'],
             'formula_foz':
-            ['DOT0700', 'DOT0800' ],
+            ['DOT0700', 'DOT0800'],
             'cereal_oz':
             ['GRW0600','GRS0600','GRR0600','GRW0700','GRS0700','GRR0700'],
             'bbcereal_hcup':
@@ -185,7 +221,9 @@ def main(arglist):
     'hei_vegetables':
     ['hei_totveg', 'hei_greensbeans'],
     'hei_proteins':
-    ['hei_totproteins','hei_seafoodplantprot']
+    ['hei_totproteins','hei_seafoodplantprot'],
+    'hei_dairy':
+    ['hei_dairy','formula_foz']
     }
 
     interest = ['Participant ID','Energy (kcal)', 'hei_totveg', 'hei_greensbeans', 'hei_totfruit', 'hei_wholefruit', 'hei_wholegrains','hei_dairy', 'hei_totproteins', 'hei_seafoodplantprot', 'Total Polyunsaturated Fatty Acids (PUFA) (g)',
@@ -227,7 +265,7 @@ def main(arglist):
         df=a[arglist['OPTS'][0]]
         x=HEI.BCP(df, arglist)
         print('starting to generate components')
-        y=HEI.make_ped_components(hei_dict,hei_ped_dict, x)
+        y=HEI.make_ped_components(hei_ped_dict, x)
         print('starting to generate hei groups')
         que=HEI.make_hei(y, make_hei_dict)
         z=HEI.grouper(que, ped_interest)
@@ -235,11 +273,14 @@ def main(arglist):
         df=HEI.splitter(z['hei0409'])
         for key, value in df.items():
             if key == 'DF_child':
+                HEI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'child')
                 HEI.check(ped_dict['child'], value, 'hei0409', key, arglist)
             elif key == 'DF_young':
+                HEI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'young')
                 HEI.check(ped_dict['young'], value, 'hei0409', key, arglist)
             else:
-                print('im baby')
+                HEI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'infant')
+                HEI.check(ped_dict['infant'], value, 'hei0409', key, arglist)
 
 
 if __name__ == "__main__":
