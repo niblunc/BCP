@@ -321,24 +321,24 @@ def grouper(complete_df, interest):
 
 
 def DQI(df,inputt, output, parameter):
-    # pdb.set_trace()
-    # Moderation
-    print(inputt)
     if inputt in ['hei_salty','hei_sweets','hei_SSB','hei_fruitjuice','hei_refinedgrains']:
+        print('now calculating %s'%output)
         temp=df[inputt]
         MIN=parameter[0]
         MAX=parameter[1]
-        print('these are the parameters %f and %f'%(MIN,MAX))
-        pdb.set_trace()
+        # print('these are the parameters %f and %f'%(MIN,MAX))
+        # pdb.set_trace()
         df[output]=[2.5 if MIN < x <= MAX else 0 if x > MAX else 5 for x in temp]
     # No limit
-    elif inputt in ['hei_totveg', 'hei_wholefruit']:
+    elif inputt in ['hei_vegetables', 'hei_totfruit']:
+        print('now calculating %s'%output)
         temp=df[inputt]
         MIN=parameter[0]
         MAX=parameter[1]
         df[output]=[2.5 if MIN < x <= MAX else 0 if x == MIN else 5 for x in temp]
     # Upper limit
     elif inputt in ['hei_wholegrains','hei_dairy','hei_proteins']:
+        print('now calculating %s'%output)
         # pdb.set_trace()
         temp=df[inputt]
         FARMIN = parameter[0]
@@ -404,13 +404,13 @@ def check(x, data, name, option, arglist):
                'HEIX5_PROTEIN' , 'HEIX6_REFINEDGRAIN' , 'HEIX7_FRUITJUICE' , 'HEIX8_SSB', 'HEIX9_SWEETS',
                'HEIX10_SALTY']
         for key,values in x.items():
-            print('Calculating score for %s'%key)
             if key in ['hei_vegetables','hei_totfruit','hei_wholegrains','hei_dairy','hei_proteins','hei_refinedgrains',
             'hei_fruitjuice','hei_SSB','hei_sweets','hei_salty']:
+                print('Calculating score for %s'%key)
                 DQI(df,key, values['name'], values['parameters'])
 
 
     df['HEI2015_TOTAL_SCORE']=df[df.columns.intersection(toSum)].sum(axis=1)
-    print(list(df.columns))
+    # print(list(df.columns))
     concat_filepath = os.path.join(arglist['SAVE'],'%s_%s_HEI.csv'%(option, name))
     df.to_csv(concat_filepath, index=False, sep=",", header=True)

@@ -169,8 +169,6 @@ def main(arglist):
     ['hei_totproteins','hei_seafoodplantprot']
     }
 
-    hei_salty =['chips','other_fried','fries']
-
     interest = ['Participant ID','Energy (kcal)', 'hei_totveg', 'hei_greensbeans', 'hei_totfruit', 'hei_wholefruit', 'hei_wholegrains','hei_dairy', 'hei_totproteins', 'hei_seafoodplantprot', 'Total Polyunsaturated Fatty Acids (PUFA) (g)',
             'Total Monounsaturated Fatty Acids (MUFA) (g)', 'Total Saturated Fatty Acids (SFA) (g)',
             'hei_sodium', 'hei_refinedgrains', 'hei_addedsugars', 'ripctsfa','energy','% Calories from SFA']
@@ -185,15 +183,13 @@ def main(arglist):
     for (dirpath, dirnames, filenames) in os.walk(arglist['BASEPATH']):
         for filename in filenames:
             if filename.endswith('.zip'):
-                #print(filename)
                 tmppath=os.sep.join([dirpath, filename])
-                #print(tmppath)
                 with ZipFile(tmppath, 'r') as zipObj:
                    # Get a list of all archived file names from the zip
                    listOfFileNames = zipObj.namelist()
                    # Iterate over the file names
                    for fileName in listOfFileNames:
-                       # Check filename endswith csv
+                       # Check filename endswith txt
                         if fileName.endswith('04.txt'):
                             zipObj.extract(fileName, os.path.join(arglist['BASEPATH'],'temp_txt'))
                         if fileName.endswith('09.txt'):
@@ -202,28 +198,27 @@ def main(arglist):
 
     if arglist['CHILD'] == False:
         x=HEI.file_org(infile, arglist, important)
-
         for key,value in x.items():
             y=HEI.make_components(hei_dict, value)
             z=HEI.grouper(y, interest)
             for k, item in z.items():
-                # print(k)
                 HEI.check(para_dict, item, k, key, arglist)
     else:
         x=HEI.file_org(infile, arglist, important)
         for key,value in x.items():
+            print('starting to generate components for %s'%key)
             y=HEI.make_ped_components(hei_dict,hei_ped_dict, value)
-            print(y.shape)
-            q=HEI.make_hei(y, make_hei_dict)
-            print(q.shape)
-            z=HEI.grouper(q, ped_interest)
-            print(z)
-            for k, item in z.items():
-                print(k)
-                print(item)
-                print(key)
-                print(arglist)
-                HEI.check(ped811_dict, item, k, key, arglist)
+            print('starting to generate hei groups for %s'%key)
+            que=HEI.make_hei(y, make_hei_dict)
+            z=HEI.grouper(que, ped_interest)
+            HEI.check(ped811_dict, z['hei0409'], 'hei0409', key, arglist)
+            # pdb.set_trace()
+            # for k, item in z.items():
+            #     print(k)
+            #     print(item)
+            #     print(key)
+            #     print(arglist)
+            #     HEI.check(ped811_dict, item, k, key, arglist)
 
 
 if __name__ == "__main__":
