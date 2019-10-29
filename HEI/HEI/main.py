@@ -22,7 +22,7 @@ def main(arglist):
         arglist.pop('SAVE')
         arglist['SAVE']=arglist['BASEPATH']
     print(arglist)
-    print('Using version:', sys.version[:5])
+    print('Using python version:', sys.version[:5])
 
 #    Dictionaries and lists
     important=['Participant ID','VEG0100','VEG0200','VEG0300','VEG0400','VEG0800','VEG0450','VEG0700',

@@ -423,7 +423,7 @@ def infant_DQI(df, inputt, output, parameter):
     MIN=0
     if inputt in ['hei_salty','hei_sweets','hei_SSB','hei_fruitjuice','hei_refinedgrains','hei_vegetables', 'hei_totfruit',
     'hei_wholegrains','hei_dairy','hei_proteins', 'hei_cereal']:
-        print('now calculating %s'%output)
+        print('now calculating infant %s'%output)
         temp=df[inputt]
         df[output]=[5 if x == MIN else 0 for x in temp]
     return(df)
@@ -490,7 +490,7 @@ def check(dic, data, name, option, arglist):
         df=data
         for key,values in dic.items():
             if key in ['hei_vegetables','hei_totfruit','hei_wholegrains','hei_dairy','hei_milk','hei_proteins','hei_refinedgrains',
-            'hei_fruitjuice','hei_SSB','hei_sweets','hei_salty']:
+            'hei_fruitjuice','hei_SSB','hei_sweets','hei_salty','hei_cereal']:
                 print('Calculating score for %s'%key)
                 if name != 'infant':
                     toSum=['HEIX0_BREASTFEEDING','HEIX1_VEGETABLES','HEIX2_TOTALFRUIT' , 'HEIX3_WHOLEGRAIN' , 'HEIX4_TOTALDAIRY' ,
