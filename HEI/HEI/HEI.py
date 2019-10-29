@@ -19,19 +19,25 @@ import argparse
 import pdb
 from datetime import datetime
 
-def BCP(diet_df, arglist):
+### these functions are specific for BCP data, other data may not need these
+def path_finder(arglist):
     #read in the data
     df1=os.path.join(arglist['BASEPATH'],arglist['XTRA'][0])
     df2=os.path.join(arglist['BASEPATH'],arglist['XTRA'][1])
     print(df1)
     demo_df=pd.read_csv(df1, sep=',')
     infant_df=pd.read_csv(df2, sep=',', encoding='latin1')
-    #refactor
+    return(demo_df,infant_df )
+
+def refactor(infant_df):
     infant_df['breastfed']=infant_df['breastfed'].replace({'no': 0, 'yes': 1})
     infant_df['any_formula']=infant_df['any_formula'].replace({'no': 0, 'yes': 1,'NaN':'NA'})
     infant_df['regular_formula']=infant_df['regular_formula'].replace({'no': 0, 'yes': 1,'NaN':'NA','not_answered':'NA'})
     infant_df['age_fed_dropdown']=infant_df['age_fed_dropdown'].replace({'no': 0, 'yes': 1,'NaN':'NA','not_answered':'NA','never_not_yet':0})
-    #check similarity
+    infant_df['age_stop_dropdown']=infant_df['age_stop_dropdown'].replace({'no': 0, 'yes': 1,'NaN':'NA','not_answered':'NA','never_not_yet':0})
+    return(infant_df)
+
+def samesies(demo_df, infant_df):
     b=list(demo_df['PSCID'])
     a=list(infant_df['PSCID'])
 
@@ -39,7 +45,10 @@ def BCP(diet_df, arglist):
     #find unique elements, set the index to be the ID, make into dictionary
     demo_df=demo_df[demo_df['PSCID'].isin(common)]
     infant_df=infant_df[infant_df['PSCID'].isin(common)]
+    return(demo_df, infant_df)
 
+
+def combo(infant_df, demo_df, diet_df):
     infant_df_un=infant_df.drop_duplicates(['PSCID'])
     infant_df_un=infant_df_un.set_index('CandID')
     infant_dict=infant_df_un.to_dict('index')
@@ -50,7 +59,9 @@ def BCP(diet_df, arglist):
     demo_dict=demo_df_un.to_dict('index')
     demo_dict = {str(k):v for k,v in demo_dict.items()}
     alldiet_dict=diet_df.to_dict('index')
+    return(infant_dict, demo_dict, alldiet_dict)
 
+def ager(alldiet_dict, demo_dict, infant_dict):
     # Get the age in months of each recall
     for key, item in alldiet_dict.items():
         print('this is the key %s'%key)
@@ -80,7 +91,9 @@ def BCP(diet_df, arglist):
                 data[count]={'ID':ID,'demo':demo_dict[ID], 'infant':infant_dict[ID], 'diet':item}
         else:
             print('NO DICE')
-    # Make this into a single dataset
+    return(data)
+
+def BCPconcat(data):
     columns = list(data[1]['demo'].keys())
     df_ = pd.DataFrame(index=[0], columns=columns)
     cols=list(data[1].keys())
@@ -92,24 +105,34 @@ def BCP(diet_df, arglist):
             tmp=pd.DataFrame(data[k][i], index=[data[k]['ID']])
             df_=pd.concat([df_,tmp], axis=0)
         DATA_dict[i]=df_
+    return(DATA_dict)
 
+def total_child_df(DATA_dict, arglist):
     DF=DATA_dict['diet'].merge(DATA_dict['infant'].drop_duplicates(), left_index=True, right_index=True)
     DF=DF.merge(DATA_dict['demo'].drop_duplicates(), left_index=True, right_index=True)
 
     concat_filepath = os.path.join(arglist['SAVE'],'test_childimd_datasetTOTAL.csv')
     DF.to_csv(concat_filepath, index=True, sep=",", header=True)
-
     return(DF)
 
-def splitter(DF):
-    DF_child=DF.query('age >= 12')
-    DF_young=DF.query('age < 12 and age >= 8')
-    DF_infant=DF.query(' age < 8')
-    df={'DF_child':DF_child, 'DF_young':DF_young, 'DF_infant':DF_infant}
-    # pdb.set_trace()
-    return(df)
+def BCP(diet_df, arglist):
+    #read in the data
+    demo_df, infant_df = path_finder(arglist)
+    #refactor
+    infant_df=refactor(infant_df)
+    #check similarity
+    demo_df, infant_df = samesies(demo_df, infant_df)
 
+    infant_dict, demo_dict, alldiet_dict = combo(infant_df, demo_df, diet_df)
+    data=ager(alldiet_dict, demo_dict, infant_dict)
+    DATA_dict=BCPconcat(data)
 
+    DF=total_child_df(DATA_dict, arglist)
+
+    return(DF)
+############ end BCP specific #########
+
+#### conversions #######
 def cup2oz(cup):
     oz=cup*8
     return(oz)
@@ -121,9 +144,16 @@ def gram2oz(gram):
 def T2oz(T):
     oz=T/2
     return(oz)
+####################
+
+def splitter(DF):
+    DF_child=DF.query('age >= 12')
+    DF_young=DF.query('age < 12 and age >= 8')
+    DF_infant=DF.query(' age < 8')
+    df={'DF_child':DF_child, 'DF_young':DF_young, 'DF_infant':DF_infant}
+    return(df)
 
 def file_org(infile, arglist, important):
-    # print(infile, arglist, important)
     if arglist['OPTS'] == False:
         arglist['OPTS']=[arglist['NAMES']]
         file_dict = {"set_04": {"%s"%arglist['NAMES']:{}}, "set_09": {"%s"%arglist['NAMES']: {}}}
@@ -132,7 +162,6 @@ def file_org(infile, arglist, important):
         arglist['OPTS']=[arglist['NAMES']]
 
     else:
-#        num=len(arglist['OPTS'])
         file_dict={"set_04":{},"set_09":{}}
         for item in arglist['OPTS']:
             print('this is the item %s'%item)
@@ -215,7 +244,6 @@ def file_org(infile, arglist, important):
 
 def make_components(hei_dict, complete_df):
     for key, value in hei_dict.items():
-#        print(key)
         if key in ['hei_totveg','hei_greensbeans','hei_totfruit', 'hei_wholefruit']:
             #these are in cups
             x=value
@@ -271,7 +299,6 @@ def make_components(hei_dict, complete_df):
     return(complete_df)
 
 def make_ped_components(hei_ped_dict, complete_df):
-#    make_components(hei_dict, complete_df)
     for key, value in hei_ped_dict.items():
         # make hei_fruitjuice
         if key in ['hei_fruitjuice']:
@@ -402,7 +429,6 @@ def make_hei(complete_df, make_hei_dict):
     for k, value in make_hei_dict.items():
         x=value
         complete_df[k] = complete_df[x].astype('float').sum(axis=1)
-    # pdb.set_trace()
     return(complete_df)
 
 
@@ -415,24 +441,19 @@ def grouper(complete_df, interest, arglist):
         data_dict['dailyhei0409']=dailyhei0409
     else:
         data_dict['hei0409']=complete_df
-    # pdb.set_trace()
     return(data_dict)
 
 
 def DQI(df, inputt, output, parameter):
-    #inputt, output, parameter
     if inputt in ['hei_salty','hei_sweets','hei_SSB','hei_fruitjuice','hei_refinedgrains']:
         print('now calculating %s'%output)
         temp=df[inputt]
 
         MIN=parameter[0]
         MAX=parameter[1]
-        # print('these are the parameters %f and %f'%(MIN,MAX))
-        # pdb.set_trace()
         df[output]=[2.5 if MIN < x <= MAX else 0 if x > MAX else 5 for x in temp]
     # No limit
     elif inputt in ['hei_vegetables', 'hei_totfruit']:
-        # pdb.set_trace()
         print('now calculating %s'%output)
         temp=df[inputt]
         MIN=parameter[0]
@@ -441,7 +462,6 @@ def DQI(df, inputt, output, parameter):
     # Upper limit
     elif inputt in ['hei_wholegrains','hei_milk','hei_proteins']:
         print('now calculating %s'%output)
-        # pdb.set_trace()
         temp=df[inputt]
         FARMIN = parameter[0]
         FARMAX = parameter[1]
@@ -464,7 +484,7 @@ def DQI_BF(df, output, age_group):
     if age_group == 'infant':
         df[output]=[15 if row['four_month_ratio'] == 'exclusively_breastfed' else 5 if row['four_month_ratio'] == 'exclusively_formula' else 10 for index, row in df.iterrows()]
     else:
-        df[output]=[10 if row['age_stop'] == False and row['breastfed'] == 1 else 0 for index, row in df.iterrows()]
+        df[output]=[10 if row['age_stop_dropdown'] == 0 and row['breastfed'] == 1 else 0 for index, row in df.iterrows()]
 
 
 # https://epi.grants.cancer.gov/hei/developing.html#2010
@@ -517,7 +537,7 @@ def check(dic, data, name, option, arglist):
                 mod_check(df, key, values['name'], values['parameters'])
     else:
         df=data
-        toSum=['HEIX1_VEGETABLES','HEIX2_TOTALFRUIT' , 'HEIX3_WHOLEGRAIN' , 'HEIX4_TOTALDAIRY' ,
+        toSum=['HEIX0_BREASTFEEDING','HEIX1_VEGETABLES','HEIX2_TOTALFRUIT' , 'HEIX3_WHOLEGRAIN' , 'HEIX4_TOTALDAIRY' ,
                'HEIX5_PROTEIN' , 'HEIX6_REFINEDGRAIN' , 'HEIX7_FRUITJUICE' , 'HEIX8_SSB', 'HEIX9_SWEETS',
                'HEIX10_SALTY']
         for key,values in dic.items():
