@@ -68,7 +68,6 @@ def ager(alldiet_dict, demo_dict, infant_dict):
         print(item['Date of Intake'])
         print(item['Participant ID'])
         ID = item['Participant ID']
-        # pdb.set_trace()
         date=datetime.strptime(item['Date of Intake'], '%m/%d/%Y')
         if ID in demo_dict:
             print('present!')
@@ -351,7 +350,6 @@ def make_ped_components(hei_ped_dict, complete_df, conv_dict):
         if key in ['hei_wholegrains','hei_refinedgrains']:
             complete_df[key] = complete_df[value].astype('float')
         if key in ['hei_dairy','hei_totproteins','hei_seafoodplantprot']:
-            pdb.set_trace()
             complete_df[key]=cow_stuff(key, value, complete_df)
         if key in ['chocolate_candies', 'candies', 'frosting', 'sugar','nondairy_treat','baked_good', 'fries']:
             complete_df[key]=grammar(key, value, conv_dict[key], complete_df)
@@ -421,7 +419,7 @@ def infant_DQI(df, inputt, output, parameter):
     'hei_wholegrains','hei_dairy','hei_proteins']:
         print('now calculating %s'%output)
         temp=df[inputt]
-        df[output]=[10 if x == MIN else 0 for x in temp]
+        df[output]=[5 if x == MIN else 0 for x in temp]
     return(df)
 
 def DQI_BF(df, output, age_group):
@@ -479,19 +477,28 @@ def check(dic, data, name, option, arglist):
                     adeq_check(df, key, values['name'], values['parameters'][0])
             if key in ['hei_sodium','hei_refinedgrains','hei_addedsugars','hei_SFA']:
                 mod_check(df, key, values['name'], values['parameters'])
+        df['HEI2015_TOTAL_SCORE']=df[df.columns.intersection(toSum)].sum(axis=1)
+        concat_filepath = os.path.join(arglist['SAVE'],'%s_%s_HEI.csv'%(option, name))
+        df.to_csv(concat_filepath, index=False, sep=",", header=True)
     else:
         df=data
-        toSum=['HEIX0_BREASTFEEDING','HEIX1_VEGETABLES','HEIX2_TOTALFRUIT' , 'HEIX3_WHOLEGRAIN' , 'HEIX4_TOTALDAIRY' ,
-               'HEIX5_PROTEIN' , 'HEIX6_REFINEDGRAIN' , 'HEIX7_FRUITJUICE' , 'HEIX8_SSB', 'HEIX9_SWEETS',
-               'HEIX10_SALTY']
         for key,values in dic.items():
             if key in ['hei_vegetables','hei_totfruit','hei_wholegrains','hei_dairy','hei_milk','hei_proteins','hei_refinedgrains',
             'hei_fruitjuice','hei_SSB','hei_sweets','hei_salty']:
                 print('Calculating score for %s'%key)
                 if name != 'infant':
+                    toSum=['HEIX0_BREASTFEEDING','HEIX1_VEGETABLES','HEIX2_TOTALFRUIT' , 'HEIX3_WHOLEGRAIN' , 'HEIX4_TOTALDAIRY' ,
+                           'HEIX5_PROTEIN' , 'HEIX6_REFINEDGRAIN' , 'HEIX7_FRUITJUICE' , 'HEIX8_SSB', 'HEIX9_SWEETS',
+                           'HEIX10_SALTY']
                     DQI(df,key, values['name'], values['parameters'])
+                    df['HEI2015_TOTAL_SCORE']=df[df.columns.intersection(toSum)].sum(axis=1)
+                    concat_filepath = os.path.join(arglist['SAVE'],'%s_%s_HEI.csv'%(option, name))
+                    df.to_csv(concat_filepath, index=False, sep=",", header=True)
                 else:
+                    toSum=['HEIX0_BREASTFEEDING','HEIX1_VEGETABLES','HEIX2_TOTALFRUIT'  ,
+                           'HEIX5_PROTEIN' ,  'HEIX7_FRUITJUICE' , 'HEIX8_SSB', 'HEIX9_SWEETS',
+                           'HEIX10_SALTY']
                     infant_DQI(df,key, values['name'], values['parameters'])
-    df['HEI2015_TOTAL_SCORE']=df[df.columns.intersection(toSum)].sum(axis=1)
-    concat_filepath = os.path.join(arglist['SAVE'],'%s_%s_HEI.csv'%(option, name))
-    df.to_csv(concat_filepath, index=False, sep=",", header=True)
+                    df['HEI2015_TOTAL_SCORE']=df[df.columns.intersection(toSum)].sum(axis=1)
+                    concat_filepath = os.path.join(arglist['SAVE'],'%s_%s_HEI.csv'%(option, name))
+                    df.to_csv(concat_filepath, index=False, sep=",", header=True)
