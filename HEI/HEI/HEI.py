@@ -298,130 +298,74 @@ def make_components(hei_dict, complete_df):
             complete_df[key] = complete_df[x].astype('float')/1000
     return(complete_df)
 
-def make_ped_components(hei_ped_dict, complete_df):
-    for key, value in hei_ped_dict.items():
-        # make hei_fruitjuice
-        if key in ['hei_fruitjuice']:
-            #this is in 4floz
-            x=value
-            #this is in floz
-            complete_df[key] = 4*(complete_df[x].astype('float').sum(axis=1))
-        if key in ['hei_SSB']:
-            #this is in 4floz
-            x=value
-            #this is in floz
-            complete_df[key] = 8*(complete_df[x].astype('float').sum(axis=1))
-        # 'hei_totveg', 'hei_totfruit'
-        if key in ['hei_totveg','hei_greensbeans', 'hei_wholefruit','hei_totfruit']:
-            #these are in cups
-            x=value
-            complete_df[key] = complete_df[x].astype('float').sum(axis=1)
-            #this is now in oz
-            complete_df[key] = cup2oz(complete_df[key]/2)
-        if key in ['hei_wholegrains','hei_refinedgrains']:
-            # these are in oz
-            x=value
-            complete_df[key] = complete_df[x].astype('float')
-        if key in ['hei_dairy']:
-            # these are in cups
-            x=value[:-1]
-            tmp= complete_df[x].astype('float').sum(axis=1)
-            y=value[-1]
-            if y == 'DOT0100':
-                tmp2=complete_df[y].astype('float')/3
-                # this is in oz
-                complete_df[key]=cup2oz(tmp+tmp2)
-            else:
-                print('NO DAIRY MISSING DOT0100, needs to be last in list')
-        if key in ['hei_totproteins']:
-            # these are in oz
-            x=value[:-1]
-            tmp= complete_df[x].astype('float').sum(axis=1)
-            y=value[-1]
-            if y == 'VEG0700':
-                tmp2=complete_df[y].astype('float')*2 # this is normally 1/2
-                complete_df[key]=tmp+tmp2
-            else:
-                print('NO TOTAL PROTEIN MISSING VEG0700, needs to be last in list')
-        if key in ['hei_seafoodplantprot']:
-            # these are in oz
-            x=value[:-1]
-            tmp= complete_df[x].astype('float').sum(axis=1)
-            y=value[-1]
-            if y == 'VEG0700':
-                tmp2=complete_df[y].astype('float')*2
-                complete_df[key]=tmp+tmp2
-            else:
-                print('NO SEAFOOD AND PLANT PROTEIN MISSING VEG0700, needs to be last in list')
-        if key in ['chocolate_candies']:
-            # this is in 40g
-            x=value
-            # this is in oz
-            tmp= gram2oz(40*(complete_df[x].astype('float').sum(axis=1)))
-            complete_df[key]=tmp
-        if key in ['candies']:
-            #15g
-            x=value
-            # this is in oz
-            tmp= gram2oz(15*(complete_df[x].astype('float').sum(axis=1)))
-            complete_df[key]=tmp
-        if key in ['frosting']:
-            #35g
-            x=value
-            # this is in oz
-            tmp= gram2oz(35*(complete_df[x].astype('float').sum(axis=1)))
-            complete_df[key]=tmp
-        if key in ['sweet_sauce']:
-            #2T
-            x=value
-            # this is in oz
-            tmp= T2oz(complete_df[x].astype('float').sum(axis=1))
-            complete_df[key]=tmp
-        if key in ['sugar']:
-            #4g
-            x=value
-            tmp= gram2oz(4*(complete_df[x].astype('float').sum(axis=1)))
-            complete_df[key]=tmp
-        if key in ['syrups']:
-            #1/4 c
-            x=value
-            tmp= cup2oz(.25*(complete_df[x].astype('float').sum(axis=1)))
-            complete_df[key]=tmp
-        if key in ['Pudding']:
-            # 1c
-            x=value
-            tmp= cup2oz(complete_df[x].astype('float').sum(axis=1))
-            complete_df[key]=tmp
-        if key in ['icecream']:
-            # 1/2c
-            x=value
-            tmp= cup2oz(.5*(complete_df[x].astype('float').sum(axis=1)))
-            complete_df[key]=tmp
-        if key in ['nondairy_treat']:
-            #85g
-            x=value
-            tmp= gram2oz(85*(complete_df[x].astype('float').sum(axis=1)))
-            complete_df[key]=tmp
-        if key in ['baked_good']:
-            #55g
-            x=value
-            tmp= gram2oz(55*(complete_df[x].astype('float').sum(axis=1)))
-            complete_df[key]=tmp
-        if key in ['chips','other_fried']:
-            #these are in oz
-            x=value
-            tmp= complete_df[x].astype('float').sum(axis=1)
-            complete_df[key]=tmp
-        if key in ['fries']:
-            #these are in 70g
-            x=value
-            tmp= gram2oz(70*(complete_df[x].astype('float').sum(axis=1)))
-            complete_df[key]=tmp
-        if key in ['formula_foz']:
-            x=value
-            complete_df[key] = 5*(complete_df[x].astype('float').sum(axis=1))
-    return(complete_df)
+###############################################################################
+#########################pediatric components##################################
+def to_fluid(key,x,num, data):
+      data[key] = num*(data[x].astype('float').sum(axis=1))
+      return(data[key])
 
+def to_ounce(key, x, data):
+    data[key] = data[x].astype('float').sum(axis=1)
+    data[key] = cup2oz(data[key]/2)
+    return(data[key])
+# complete_df[key]=cow_stuff(key, value, complete_df)
+def cow_stuff(key, value, data):
+    x=value[:-1]
+    tmp= data[x].astype('float').sum(axis=1)
+    y=value[-1]
+    if key == 'hei_dairy':
+        if y == 'DOT0100':
+            tmp2=data[y].astype('float')/3
+            data[key]=cup2oz(tmp+tmp2)
+        else:
+            print('NO DAIRY MISSING DOT0100, needs to be last in list')
+    if key == 'hei_totproteins':
+        if y == 'VEG0700':
+            tmp2=data[y].astype('float')*2 # this is normally 1/2
+            data[key]=tmp+tmp2
+        else:
+            print('NO TOTAL PROTEIN MISSING VEG0700, needs to be last in list')
+    if key == 'hei_seafoodplantprot':
+        if y == 'VEG0700':
+            tmp2=data[y].astype('float')*2
+            data[key]=tmp+tmp2
+        else:
+            print('NO SEAFOOD AND PLANT PROTEIN MISSING VEG0700, needs to be last in list')
+    return(data[key])
+
+def grammar(key,x,num, data):
+    data[key] = gram2oz(num*(data[x].astype('float').sum(axis=1)))
+    return(data[key])
+
+def from_cup(key,x,num, data):
+    data[key] = cup2oz(num*(data[x].astype('float').sum(axis=1)))
+    return(data[key])
+
+def make_ped_components(hei_ped_dict, complete_df, conv_dict):
+    for key, value in hei_ped_dict.items():
+        print(key)
+        if key in ['hei_fruitjuice', 'hei_SSB','formula_foz']:
+            complete_df[key]=to_fluid(key, value, conv_dict[key], complete_df)
+        if key in ['hei_totveg','hei_greensbeans', 'hei_wholefruit','hei_totfruit']:
+            complete_df[key]=to_ounce(key, value, complete_df)
+        if key in ['hei_wholegrains','hei_refinedgrains']:
+            complete_df[key] = complete_df[value].astype('float')
+        if key in ['hei_dairy','hei_totproteins','hei_seafoodplantprot']:
+            pdb.set_trace()
+            complete_df[key]=cow_stuff(key, value, complete_df)
+        if key in ['chocolate_candies', 'candies', 'frosting', 'sugar','nondairy_treat','baked_good', 'fries']:
+            complete_df[key]=grammar(key, value, conv_dict[key], complete_df)
+        if key in ['sweet_sauce']:
+            x=value
+            complete_df[key]= T2oz(complete_df[x].astype('float').sum(axis=1))
+        if key in ['syrups','Pudding','icecream']:
+            from_cup(key, value, conv_dict[key], complete_df)
+        if key in ['chips','other_fried']:
+            x=value
+            complete_df[key]= complete_df[x].astype('float').sum(axis=1)
+    return(complete_df)
+###############################################################################
+###############################################################################
 
 def make_hei(complete_df, make_hei_dict):
     print('START')
@@ -544,7 +488,6 @@ def check(dic, data, name, option, arglist):
             if key in ['hei_vegetables','hei_totfruit','hei_wholegrains','hei_dairy','hei_milk','hei_proteins','hei_refinedgrains',
             'hei_fruitjuice','hei_SSB','hei_sweets','hei_salty']:
                 print('Calculating score for %s'%key)
-                # pdb.set_trace()
                 if name != 'infant':
                     DQI(df,key, values['name'], values['parameters'])
                 else:
