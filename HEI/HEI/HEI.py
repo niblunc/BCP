@@ -24,8 +24,8 @@ def BCP(diet_df, arglist):
     df1=os.path.join(arglist['BASEPATH'],arglist['XTRA'][0])
     df2=os.path.join(arglist['BASEPATH'],arglist['XTRA'][1])
     print(df1)
-    demo_df=pd.read_csv(df2, sep=',')
-    infant_df=pd.read_csv(df1, sep=',', encoding='latin1')
+    demo_df=pd.read_csv(df1, sep=',')
+    infant_df=pd.read_csv(df2, sep=',', encoding='latin1')
     #refactor
     infant_df['breastfed']=infant_df['breastfed'].replace({'no': 0, 'yes': 1})
     infant_df['any_formula']=infant_df['any_formula'].replace({'no': 0, 'yes': 1,'NaN':'NA'})
@@ -106,6 +106,7 @@ def splitter(DF):
     DF_young=DF.query('age < 12 and age >= 8')
     DF_infant=DF.query(' age < 8')
     df={'DF_child':DF_child, 'DF_young':DF_young, 'DF_infant':DF_infant}
+    # pdb.set_trace()
     return(df)
 
 
@@ -284,7 +285,7 @@ def make_ped_components(hei_ped_dict, complete_df):
             #this is in floz
             complete_df[key] = 8*(complete_df[x].astype('float').sum(axis=1))
         # 'hei_totveg', 'hei_totfruit'
-        if key in ['hei_totveg','hei_greensbeans', 'hei_wholefruit']:
+        if key in ['hei_totveg','hei_greensbeans', 'hei_wholefruit','hei_totfruit']:
             #these are in cups
             x=value
             complete_df[key] = complete_df[x].astype('float').sum(axis=1)
@@ -401,25 +402,22 @@ def make_hei(complete_df, make_hei_dict):
     for k, value in make_hei_dict.items():
         x=value
         complete_df[k] = complete_df[x].astype('float').sum(axis=1)
+    # pdb.set_trace()
     return(complete_df)
 
 
-def grouper(complete_df, interest):
+def grouper(complete_df, interest, arglist):
     data_dict={}
-    dailyhei0409=complete_df[complete_df.columns.intersection(interest)].groupby(['Participant ID']).mean()
-    dailyhei0409['Participant ID'] = dailyhei0409.index
-    data_dict['hei0409']=complete_df
-    data_dict['dailyhei0409']=dailyhei0409
+    if arglist['CHILD'] == False:
+        dailyhei0409=complete_df[complete_df.columns.intersection(interest)].groupby(['Participant ID']).mean()
+        dailyhei0409['Participant ID'] = dailyhei0409.index
+        data_dict['hei0409']=complete_df
+        data_dict['dailyhei0409']=dailyhei0409
+    else:
+        data_dict['hei0409']=complete_df
+    # pdb.set_trace()
     return(data_dict)
 
-
-# df=data
-# toSum=['HEIX1_VEGETABLES','HEIX2_TOTALFRUIT' , 'HEIX3_WHOLEGRAIN' , 'HEIX4_TOTALDAIRY' ,
-#        'HEIX5_PROTEIN' , 'HEIX6_REFINEDGRAIN' , 'HEIX7_FRUITJUICE' , 'HEIX8_SSB', 'HEIX9_SWEETS',
-#        'HEIX10_SALTY']
-# for key,values in dic.items():
-#     print('Calculating score for %s'%key)
-#     DQI(df,key,values)
 
 def DQI(df, inputt, output, parameter):
     #inputt, output, parameter
@@ -434,13 +432,14 @@ def DQI(df, inputt, output, parameter):
         df[output]=[2.5 if MIN < x <= MAX else 0 if x > MAX else 5 for x in temp]
     # No limit
     elif inputt in ['hei_vegetables', 'hei_totfruit']:
+        # pdb.set_trace()
         print('now calculating %s'%output)
         temp=df[inputt]
         MIN=parameter[0]
         MAX=parameter[1]
         df[output]=[2.5 if MIN < x <= MAX else 0 if x == MIN else 5 for x in temp]
     # Upper limit
-    elif inputt in ['hei_wholegrains','hei_dairy','hei_proteins']:
+    elif inputt in ['hei_wholegrains','hei_milk','hei_proteins']:
         print('now calculating %s'%output)
         # pdb.set_trace()
         temp=df[inputt]
@@ -449,6 +448,16 @@ def DQI(df, inputt, output, parameter):
         MIN = parameter[2]
         MAX = parameter[3]
         df[output]=[5 if MIN < x <= MAX else 2.5 if MIN < x <= FARMIN or MAX < x <=FARMAX else 0 for x in temp]
+    return(df)
+
+def infant_DQI(df, inputt, output, parameter):
+    #inputt, output, parameter
+    MIN=0
+    if inputt in ['hei_salty','hei_sweets','hei_SSB','hei_fruitjuice','hei_refinedgrains','hei_vegetables', 'hei_totfruit',
+    'hei_wholegrains','hei_dairy','hei_proteins']:
+        print('now calculating %s'%output)
+        temp=df[inputt]
+        df[output]=[10 if x == MIN else 0 for x in temp]
     return(df)
 
 def DQI_BF(df, output, age_group):
@@ -512,13 +521,14 @@ def check(dic, data, name, option, arglist):
                'HEIX5_PROTEIN' , 'HEIX6_REFINEDGRAIN' , 'HEIX7_FRUITJUICE' , 'HEIX8_SSB', 'HEIX9_SWEETS',
                'HEIX10_SALTY']
         for key,values in dic.items():
-            if key in ['hei_vegetables','hei_totfruit','hei_wholegrains','hei_dairy','hei_proteins','hei_refinedgrains',
+            if key in ['hei_vegetables','hei_totfruit','hei_wholegrains','hei_dairy','hei_milk','hei_proteins','hei_refinedgrains',
             'hei_fruitjuice','hei_SSB','hei_sweets','hei_salty']:
                 print('Calculating score for %s'%key)
-                DQI(df,key, values['name'], values['parameters'])
-
-
+                # pdb.set_trace()
+                if name != 'infant':
+                    DQI(df,key, values['name'], values['parameters'])
+                else:
+                    infant_DQI(df,key, values['name'], values['parameters'])
     df['HEI2015_TOTAL_SCORE']=df[df.columns.intersection(toSum)].sum(axis=1)
-    # print(list(df.columns))
     concat_filepath = os.path.join(arglist['SAVE'],'%s_%s_HEI.csv'%(option, name))
     df.to_csv(concat_filepath, index=False, sep=",", header=True)

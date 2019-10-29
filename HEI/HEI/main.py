@@ -12,13 +12,9 @@ import warnings
 warnings.filterwarnings('ignore')
 from zipfile import ZipFile
 import argparse
-import urllib.error
-import urllib.request
-
-from functools import lru_cache
-
 import pdb
 import HEI
+import sys
 
 def main(arglist):
     if arglist['SAVE'] == False:
@@ -26,6 +22,7 @@ def main(arglist):
         arglist.pop('SAVE')
         arglist['SAVE']=arglist['BASEPATH']
     print(arglist)
+    print('Using version:', sys.version[:5])
 
 #    Dictionaries and lists
     important=['Participant ID','VEG0100','VEG0200','VEG0300','VEG0400','VEG0800','VEG0450','VEG0700',
@@ -68,7 +65,7 @@ def main(arglist):
         'hei_vegetables': {'parameters':[0.1,1.9], 'name': 'HEIX1_VEGETABLES'},
         'hei_totfruit': {'parameters':[0.1,1.9], 'name': 'HEIX2_TOTALFRUIT'},
         'hei_wholegrains': {'parameters':[1.0,3.5,0.0 , 8.0], 'name': 'HEIX3_WHOLEGRAIN'},
-        'hei_dairy': {'parameters':[20,28,8,35], 'name': 'HEIX4_TOTALDAIRY'},
+        'hei_milk': {'parameters':[20,28,8,35], 'name': 'HEIX4_TOTALDAIRY'},
         'hei_proteins': {'parameters':[2.5,6.0,0,10.0], 'name': 'HEIX5_PROTEIN'},
         'hei_refinedgrains': {'parameters':[1.6,3.5], 'name': 'HEIX6_REFINEDGRAIN'},
         'hei_fruitjuice': {'parameters':[0.1,6.0], 'name': 'HEIX7_FRUITJUICE'},
@@ -81,7 +78,7 @@ def main(arglist):
         'hei_vegetables': {'parameters':[0.1,7.9], 'name': 'HEIX1_VEGETABLES'},
         'hei_totfruit': {'parameters':[0.1,7.9], 'name': 'HEIX2_TOTALFRUIT'},
         'hei_wholegrains': {'parameters':[1.5, 5.5, 0, 8.0], 'name': 'HEIX3_WHOLEGRAIN'},
-        'hei_dairy': {'parameters':[14.0,18.0,8.0,24.0], 'name': 'HEIX4_TOTALDAIRY'},
+        'hei_milk': {'parameters':[14.0,18.0,8.0,24.0], 'name': 'HEIX4_TOTALDAIRY'},
         'hei_proteins': {'parameters':[2.0,3.0,0,6.0], 'name': 'HEIX5_PROTEIN'},
         'hei_refinedgrains': {'parameters':[1.9, 4.2], 'name': 'HEIX6_REFINEDGRAIN'},
         'hei_fruitjuice': {'parameters':[4.1,6.0], 'name': 'HEIX7_FRUITJUICE'},
@@ -91,16 +88,16 @@ def main(arglist):
             }
 
     ped08_dict = {
-        'hei_vegetables': {'parameters':[0], 'name': 'HEIX1_VEGETABLES'},
-        'hei_totfruit': {'parameters':[0], 'name': 'HEIX2_TOTALFRUIT'},
-        'hei_wholegrains': {'parameters':[0], 'name': 'HEIX3_WHOLEGRAIN'},
-        'hei_dairy': {'parameters':[0], 'name': 'HEIX4_TOTALDAIRY'},
-        'hei_proteins': {'parameters':[0], 'name': 'HEIX5_PROTEIN'},
-        'hei_refinedgrains': {'parameters':[0], 'name': 'HEIX6_REFINEDGRAIN'},
-        'hei_fruitjuice': {'parameters':[0], 'name': 'HEIX7_FRUITJUICE'},
-        'hei_SSB': {'parameters':[0], 'name': 'HEIX8_SSB'},
-        'hei_sweets': {'parameters':[0], 'name': 'HEIX9_SWEETS'},
-        'hei_salty': {'parameters':[0], 'name': 'HEIX10_SALTY'}
+        'hei_vegetables': {'parameters':[0,0], 'name': 'HEIX1_VEGETABLES'},
+        'hei_totfruit': {'parameters':[0,0], 'name': 'HEIX2_TOTALFRUIT'},
+        'hei_wholegrains': {'parameters':[0,0,0,0], 'name': 'HEIX3_WHOLEGRAIN'},
+        'hei_dairy': {'parameters':[0,0,0,0], 'name': 'HEIX4_TOTALDAIRY'},
+        'hei_proteins': {'parameters':[0,0,0,0], 'name': 'HEIX5_PROTEIN'},
+        'hei_refinedgrains': {'parameters':[0,0], 'name': 'HEIX6_REFINEDGRAIN'},
+        'hei_fruitjuice': {'parameters':[0,0], 'name': 'HEIX7_FRUITJUICE'},
+        'hei_SSB': {'parameters':[0,0], 'name': 'HEIX8_SSB'},
+        'hei_sweets': {'parameters':[0,0], 'name': 'HEIX9_SWEETS'},
+        'hei_salty': {'parameters':[0,0], 'name': 'HEIX10_SALTY'}
     }
     ped_dict={'young': ped811_dict,
         'child':ped1224_dict,
@@ -222,7 +219,7 @@ def main(arglist):
     ['hei_totveg', 'hei_greensbeans'],
     'hei_proteins':
     ['hei_totproteins','hei_seafoodplantprot'],
-    'hei_dairy':
+    'hei_milk':
     ['hei_dairy','formula_foz']
     }
 
@@ -257,7 +254,7 @@ def main(arglist):
         x=HEI.file_org(infile, arglist, important)
         for key,value in x.items():
             y=HEI.make_components(hei_dict, value)
-            z=HEI.grouper(y, interest)
+            z=HEI.grouper(y, interest, arglist)
             for k, item in z.items():
                 HEI.check(para_dict, item, k, key, arglist)
     else:
@@ -268,19 +265,19 @@ def main(arglist):
         y=HEI.make_ped_components(hei_ped_dict, x)
         print('starting to generate hei groups')
         que=HEI.make_hei(y, make_hei_dict)
-        z=HEI.grouper(que, ped_interest)
+        z=HEI.grouper(que, ped_interest, arglist)
         key='child'
         df=HEI.splitter(z['hei0409'])
         for key, value in df.items():
             if key == 'DF_child':
                 HEI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'child')
-                HEI.check(ped_dict['child'], value, 'hei0409', key, arglist)
+                HEI.check(ped_dict['child'], value, 'child', key, arglist)
             elif key == 'DF_young':
                 HEI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'young')
-                HEI.check(ped_dict['young'], value, 'hei0409', key, arglist)
+                HEI.check(ped_dict['young'], value, 'young', key, arglist)
             else:
                 HEI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'infant')
-                HEI.check(ped_dict['infant'], value, 'hei0409', key, arglist)
+                HEI.check(ped_dict['infant'], value, 'infant', key, arglist)
 
 
 if __name__ == "__main__":
