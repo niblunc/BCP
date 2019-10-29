@@ -210,6 +210,22 @@ def main(arglist):
             ['GRW1300','GRS1300']
             }
 
+    conv_dict={
+    'hei_fruitjuice':4,
+    'hei_SSB':8,
+    'chocolate_candies':40,
+    'candies':15,
+    'frosting':35,
+    'sugar':4,
+    'syrups':.25,
+    'Pudding':1,
+    'icecream':.5,
+    'nondairy_treat':85,
+    'baked_good':55,
+    'fries': 70,
+    'formula_foz':5
+    }
+
     make_hei_dict={
     'hei_sweets' :
     ['chocolate_candies','candies','frosting','sweet_sauce','sugar','syrups','Pudding', 'icecream','nondairy_treat','baked_good'],
@@ -262,7 +278,7 @@ def main(arglist):
         df=a[arglist['OPTS'][0]]
         x=HEI.BCP(df, arglist)
         print('starting to generate components')
-        y=HEI.make_ped_components(hei_ped_dict, x)
+        y=HEI.make_ped_components(hei_ped_dict, x, conv_dict)
         print('starting to generate hei groups')
         que=HEI.make_hei(y, make_hei_dict)
         z=HEI.grouper(que, ped_interest, arglist)
