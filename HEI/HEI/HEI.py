@@ -347,6 +347,12 @@ def make_ped_components(hei_ped_dict, complete_df, conv_dict):
             complete_df[key]=to_fluid(key, value, conv_dict[key], complete_df)
         if key in ['hei_totveg','hei_greensbeans', 'hei_wholefruit','hei_totfruit']:
             complete_df[key]=to_ounce(key, value, complete_df)
+        if key in ['cereal_oz', 'bbcereal_hcup']:
+            if key == 'bbcereal_hcup':
+                from_cup(key,value, conv_dict[key] , complete_df)
+            else:
+                x=value
+                complete_df[key]= complete_df[x].astype('float').sum(axis=1)
         if key in ['hei_wholegrains','hei_refinedgrains']:
             complete_df[key] = complete_df[value].astype('float')
         if key in ['hei_dairy','hei_totproteins','hei_seafoodplantprot']:
@@ -416,7 +422,7 @@ def infant_DQI(df, inputt, output, parameter):
     #inputt, output, parameter
     MIN=0
     if inputt in ['hei_salty','hei_sweets','hei_SSB','hei_fruitjuice','hei_refinedgrains','hei_vegetables', 'hei_totfruit',
-    'hei_wholegrains','hei_dairy','hei_proteins']:
+    'hei_wholegrains','hei_dairy','hei_proteins', 'hei_cereal']:
         print('now calculating %s'%output)
         temp=df[inputt]
         df[output]=[5 if x == MIN else 0 for x in temp]
@@ -497,7 +503,7 @@ def check(dic, data, name, option, arglist):
                 else:
                     toSum=['HEIX0_BREASTFEEDING','HEIX1_VEGETABLES','HEIX2_TOTALFRUIT'  ,
                            'HEIX5_PROTEIN' ,  'HEIX7_FRUITJUICE' , 'HEIX8_SSB', 'HEIX9_SWEETS',
-                           'HEIX10_SALTY']
+                           'HEIX10_SALTY', 'HEIX11_CEREAL']
                     infant_DQI(df,key, values['name'], values['parameters'])
                     df['HEI2015_TOTAL_SCORE']=df[df.columns.intersection(toSum)].sum(axis=1)
                     concat_filepath = os.path.join(arglist['SAVE'],'%s_%s_HEI.csv'%(option, name))

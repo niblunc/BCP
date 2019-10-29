@@ -97,7 +97,8 @@ def main(arglist):
         'hei_fruitjuice': {'parameters':[0,0], 'name': 'HEIX7_FRUITJUICE'},
         'hei_SSB': {'parameters':[0,0], 'name': 'HEIX8_SSB'},
         'hei_sweets': {'parameters':[0,0], 'name': 'HEIX9_SWEETS'},
-        'hei_salty': {'parameters':[0,0], 'name': 'HEIX10_SALTY'}
+        'hei_salty': {'parameters':[0,0], 'name': 'HEIX10_SALTY'},
+        'hei_cereal': {'parameters':[0,0], 'name': 'HEIX11_CEREAL'}
     }
     ped_dict={'young': ped811_dict,
         'child':ped1224_dict,
@@ -223,7 +224,8 @@ def main(arglist):
     'nondairy_treat':85,
     'baked_good':55,
     'fries': 70,
-    'formula_foz':5
+    'formula_foz':5,
+    'bbcereal_hcup':.5
     }
 
     make_hei_dict={
@@ -236,7 +238,9 @@ def main(arglist):
     'hei_proteins':
     ['hei_totproteins','hei_seafoodplantprot'],
     'hei_milk':
-    ['hei_dairy','formula_foz']
+    ['hei_dairy','formula_foz'],
+    'hei_cereal':
+    ['cereal_oz', 'bbcereal_hcup']
     }
 
     interest = ['Participant ID','Energy (kcal)', 'hei_totveg', 'hei_greensbeans', 'hei_totfruit', 'hei_wholefruit', 'hei_wholegrains','hei_dairy', 'hei_totproteins', 'hei_seafoodplantprot', 'Total Polyunsaturated Fatty Acids (PUFA) (g)',
