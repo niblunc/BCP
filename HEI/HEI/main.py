@@ -278,9 +278,9 @@ def main(arglist):
             for k, item in z.items():
                 HEI.check(para_dict, item, k, key, arglist)
     else:
-        a=HEI.file_org(infile, arglist, important)
-        df=a[arglist['OPTS'][0]]
-        x=HEI.BCP(df, arglist)
+        a=HEI.file_org(infile, arglist, important) # still works
+        df=a[arglist['OPTS'][0]] # still works
+        x=HEI.BCP(df, arglist) # depends on XTRA, breaking
         print('starting to generate components')
         y=HEI.make_ped_components(hei_ped_dict, x, conv_dict)
         print('starting to generate hei groups')
@@ -312,8 +312,10 @@ if __name__ == "__main__":
                         default=False, help='Do you have multiple different 04 and 09 files that need to be kept seperate? Please enter strings that can be searched with (this should be in the file path) no commas')
     parser.add_argument('-child',dest='CHILD', action='store',
                         default=False, help='Is this pediatric data? If True, then you need the following other files in xtra: demographics (with birthday) and then infant feeding data')
-    parser.add_argument('-xtra', dest='XTRA', nargs='+',
-                        default=False, help='FIRST demographics (with birthday) and SECOND infant feeding data')
+    # Need to change this! New outline#####################################################################################
+    # parser.add_argument('-xtra', dest='XTRA', nargs='+',
+    #                     default=False, help='FIRST demographics (with birthday) and SECOND infant feeding data')
+    ########################################################################################################################
     parser.add_argument('-save',dest='SAVE', action='store',
                         default=False, help='Path to save output, if not filled in will default to the basepath')
 
