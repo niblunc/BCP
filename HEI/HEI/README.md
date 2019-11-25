@@ -14,4 +14,7 @@ This is specific for the pediatric because they have non-standard components, ne
 OUTPUT - dataframe
 
 # grouper
-makes both the daily and overall all hei scores. For the pediatric only want to use the daily 
+makes both the daily and overall all hei scores. For the pediatric only want to use the raw NOT daily.
+
+# Check
+This function is taking the dictionary of parameters, the datatables and making the calculated HEI scores which are then summed for the total HEI score. This function in the pediatric data calls DQI(), in the adult data it calls adeq_check and mod_check. 
