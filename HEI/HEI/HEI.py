@@ -48,49 +48,49 @@ def samesies(demo_df, infant_df):
     return(demo_df, infant_df)
 
 
-def combo(infant_df, demo_df, diet_df):
-    infant_df_un=infant_df.drop_duplicates(['PSCID'])
-    infant_df_un=infant_df_un.set_index('CandID')
-    infant_dict=infant_df_un.to_dict('index')
-    infant_dict = {str(k):v for k,v in infant_dict.items()}
+# def combo(infant_df, demo_df, diet_df):
+#     infant_df_un=infant_df.drop_duplicates(['PSCID'])
+#     infant_df_un=infant_df_un.set_index('CandID')
+#     infant_dict=infant_df_un.to_dict('index')
+#     infant_dict = {str(k):v for k,v in infant_dict.items()}
+#
+#     demo_df_un=demo_df.drop_duplicates(['PSCID'])
+#     demo_df_un=demo_df_un.set_index(str('CandID'))
+#     demo_dict=demo_df_un.to_dict('index')
+#     demo_dict = {str(k):v for k,v in demo_dict.items()}
+#     alldiet_dict=diet_df.to_dict('index')
+#     return(infant_dict, demo_dict, alldiet_dict)
 
-    demo_df_un=demo_df.drop_duplicates(['PSCID'])
-    demo_df_un=demo_df_un.set_index(str('CandID'))
-    demo_dict=demo_df_un.to_dict('index')
-    demo_dict = {str(k):v for k,v in demo_dict.items()}
-    alldiet_dict=diet_df.to_dict('index')
-    return(infant_dict, demo_dict, alldiet_dict)
-
-def ager(alldiet_dict, demo_dict, infant_dict):
-    # Get the age in months of each recall
-    for key, item in alldiet_dict.items():
-        print('this is the key %s'%key)
-        print(item['Date of Intake'])
-        print(item['Participant ID'])
-        ID = item['Participant ID']
-        date=datetime.strptime(item['Date of Intake'], '%m/%d/%Y')
-        if ID in demo_dict:
-            print('present!')
-            birthday=datetime.strptime(demo_dict[ID]['DoB'], '%m/%d/%y')
-            age = (date-birthday)
-            print('this is the number of days %s'%age.days)
-            alldiet_dict[key]['age']=float(age.days)/12
-        else:
-            print('NOPE')
-    # Sort the data by age at input (within 1 year of diet recall)
-    data = {}
-    count=0
-    for key, item in alldiet_dict.items():
-        ID = item['Participant ID']
-        if ID in demo_dict and infant_dict:
-            print('GOT IT!')
-            if (abs(item['age'] - infant_dict[ID]['Candidate_Age'])) < 12:
-                print('SAME YEAR %s'%ID)
-                count=count+1
-                data[count]={'ID':ID,'demo':demo_dict[ID], 'infant':infant_dict[ID], 'diet':item}
-        else:
-            print('NO DICE')
-    return(data)
+# def ager(alldiet_dict, demo_dict, infant_dict):
+#     # Get the age in months of each recall
+#     for key, item in alldiet_dict.items():
+#         print('this is the key %s'%key)
+#         print(item['Date of Intake'])
+#         print(item['Participant ID'])
+#         ID = item['Participant ID']
+#         date=datetime.strptime(item['Date of Intake'], '%m/%d/%Y')
+#         if ID in demo_dict:
+#             print('present!')
+#             birthday=datetime.strptime(demo_dict[ID]['DoB'], '%m/%d/%y')
+#             age = (date-birthday)
+#             print('this is the number of days %s'%age.days)
+#             alldiet_dict[key]['age']=float(age.days)/12
+#         else:
+#             print('NOPE')
+#     # Sort the data by age at input (within 1 year of diet recall)
+#     data = {}
+#     count=0
+#     for key, item in alldiet_dict.items():
+#         ID = item['Participant ID']
+#         if ID in demo_dict and infant_dict:
+#             print('GOT IT!')
+#             if (abs(item['age'] - infant_dict[ID]['Candidate_Age'])) < 12:
+#                 print('SAME YEAR %s'%ID)
+#                 count=count+1
+#                 data[count]={'ID':ID,'demo':demo_dict[ID], 'infant':infant_dict[ID], 'diet':item}
+#         else:
+#             print('NO DICE')
+#     return(data)
 
 def BCPconcat(data):
     columns = list(data[1]['demo'].keys())
@@ -387,9 +387,10 @@ def grouper(complete_df, interest, arglist):
         dailyhei0409['Participant ID'] = dailyhei0409.index
         data_dict['hei0409']=complete_df
         data_dict['dailyhei0409']=dailyhei0409
+        return(data_dict)
     else:
-        data_dict['hei0409']=complete_df
-    return(data_dict)
+        print('cool')
+        return(complete_df)
 
 
 def DQI(df, inputt, output, parameter):
