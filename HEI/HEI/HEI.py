@@ -22,12 +22,10 @@ from datetime import datetime
 ### these functions are specific for BCP data, other data may not need these
 def path_finder(arglist):
     #read in the data
-    df1=os.path.join(arglist['BASEPATH'],arglist['XTRA'][0])
-    df2=os.path.join(arglist['BASEPATH'],arglist['XTRA'][1])
+    df1=os.path.join(arglist['BASEPATH'],arglist['SAVE'],arglist['XTRA'])
     print(df1)
-    demo_df=pd.read_csv(df1, sep=',')
-    infant_df=pd.read_csv(df2, sep=',', encoding='latin1')
-    return(demo_df,infant_df )
+    demo_df=pd.read_csv(df1, sep=',',encoding='latin1')
+    return(demo_df)
 
 def refactor(infant_df):
     infant_df['breastfed']=infant_df['breastfed'].replace({'no': 0, 'yes': 1})
@@ -60,37 +58,18 @@ def samesies(demo_df, infant_df):
 #     demo_dict = {str(k):v for k,v in demo_dict.items()}
 #     alldiet_dict=diet_df.to_dict('index')
 #     return(infant_dict, demo_dict, alldiet_dict)
+def ager(x):
+    # Get the age in months of each recall
+    x['DoB'] = pd.to_datetime(x['DoB'])
+    x['Date of Intake'] = pd.to_datetime(x['Date of Intake'])
+    x['Date_taken'] = pd.to_datetime(x['Date_taken'])
 
-# def ager(alldiet_dict, demo_dict, infant_dict):
-#     # Get the age in months of each recall
-#     for key, item in alldiet_dict.items():
-#         print('this is the key %s'%key)
-#         print(item['Date of Intake'])
-#         print(item['Participant ID'])
-#         ID = item['Participant ID']
-#         date=datetime.strptime(item['Date of Intake'], '%m/%d/%Y')
-#         if ID in demo_dict:
-#             print('present!')
-#             birthday=datetime.strptime(demo_dict[ID]['DoB'], '%m/%d/%y')
-#             age = (date-birthday)
-#             print('this is the number of days %s'%age.days)
-#             alldiet_dict[key]['age']=float(age.days)/12
-#         else:
-#             print('NOPE')
-#     # Sort the data by age at input (within 1 year of diet recall)
-#     data = {}
-#     count=0
-#     for key, item in alldiet_dict.items():
-#         ID = item['Participant ID']
-#         if ID in demo_dict and infant_dict:
-#             print('GOT IT!')
-#             if (abs(item['age'] - infant_dict[ID]['Candidate_Age'])) < 12:
-#                 print('SAME YEAR %s'%ID)
-#                 count=count+1
-#                 data[count]={'ID':ID,'demo':demo_dict[ID], 'infant':infant_dict[ID], 'diet':item}
-#         else:
-#             print('NO DICE')
-#     return(data)
+    x['Age_at_Date_of_Intake'] = x['Date of Intake'] - x['DoB']
+    x['Age_at_Date_of_Anthros'] = x['Date_taken'] - x['DoB']
+
+    x['Age_at_Date_of_Intake']= x['Age_at_Date_of_Intake']/ np.timedelta64(1, 'M')
+    x['Age_at_Date_of_Anthros']= x['Age_at_Date_of_Anthros']/ np.timedelta64(1, 'M')
+    return(x)
 
 def BCPconcat(data):
     columns = list(data[1]['demo'].keys())
@@ -115,20 +94,20 @@ def total_child_df(DATA_dict, arglist):
     return(DF)
 
 def BCP(diet_df, arglist):
-    #read in the data
-    demo_df, infant_df = path_finder(arglist)
-    #refactor
-    infant_df=refactor(infant_df)
-    #check similarity
-    demo_df, infant_df = samesies(demo_df, infant_df)
+    diet_df=df
+    demo_df = path_finder(arglist)
+    y='Participant ID'
+    diet_df[y]=diet_df[y].convert_objects(convert_numeric=True)
+    demo_df[y]=demo_df[y].convert_objects(convert_numeric=True)
+    unique1 = list(set(demo_df[y])-set(diet_df[y]))
+    print(unique1)
+    unique2 = list(set(diet_df[y])-set(demo_df[y]))
+    print(unique2)
+    all_data=demo_df.merge(diet_df, on=[y])
+    all_data=ager(all_data)
+    all_data['Identifiers_visit']=all_data.Identifiers.str.split('x').str[-1].str.split('m').str[0]
 
-    infant_dict, demo_dict, alldiet_dict = combo(infant_df, demo_df, diet_df)
-    data=ager(alldiet_dict, demo_dict, infant_dict)
-    DATA_dict=BCPconcat(data)
-
-    DF=total_child_df(DATA_dict, arglist)
-
-    return(DF)
+    return(all_data)
 ############ end BCP specific #########
 
 #### conversions #######
@@ -146,9 +125,9 @@ def T2oz(T):
 ####################
 
 def splitter(DF):
-    DF_child=DF.query('age >= 12')
-    DF_young=DF.query('age < 12 and age >= 8')
-    DF_infant=DF.query(' age < 8')
+    DF_child=DF.query('Age_at_Date_of_Intake >= 12 & Identifiers_visit >= 12 & Age_at_Date_of_Anthros >= 12')
+    DF_young=DF.query('Age_at_Date_of_Intake < 12 and Age_at_Date_of_Intake >= 8 & Identifiers_visit < 12 and Identifiers_visit >= 8 & Age_at_Date_of_Anthros < 12 and Age_at_Date_of_Anthros >= 8')
+    DF_infant=DF.query('Age_at_Date_of_Intake < 8 & Identifiers_visit < 8 & Age_at_Date_of_Anthros < 8')
     df={'DF_child':DF_child, 'DF_young':DF_young, 'DF_infant':DF_infant}
     return(df)
 
@@ -394,10 +373,9 @@ def grouper(complete_df, interest, arglist):
 
 
 def DQI(df, inputt, output, parameter):
-    if inputt in ['hei_salty','hei_sweets','hei_SSB','hei_fruitjuice','hei_refinedgrains']:
+    if inputt in ['hei_salty','hei_sweets','hei_SSB','hei_fruitjuice']:
         print('now calculating %s'%output)
         temp=df[inputt]
-
         MIN=parameter[0]
         MAX=parameter[1]
         df[output]=[2.5 if MIN < x <= MAX else 0 if x > MAX else 5 for x in temp]
@@ -409,7 +387,7 @@ def DQI(df, inputt, output, parameter):
         MAX=parameter[1]
         df[output]=[2.5 if MIN < x <= MAX else 0 if x == MIN else 5 for x in temp]
     # Upper limit
-    elif inputt in ['hei_wholegrains','hei_milk','hei_proteins']:
+    elif inputt in ['hei_milk','hei_proteins']:
         print('now calculating %s'%output)
         temp=df[inputt]
         FARMIN = parameter[0]
@@ -417,6 +395,20 @@ def DQI(df, inputt, output, parameter):
         MIN = parameter[2]
         MAX = parameter[3]
         df[output]=[5 if MIN < x <= MAX else 2.5 if MIN < x <= FARMIN or MAX < x <=FARMAX else 0 for x in temp]
+    elif inputt in ['hei_wholegrains']:
+        print('now calculating %s'%output)
+        temp=df[inputt]
+        FARMIN = parameter[0]
+        FARMAX = parameter[1]
+        MIN = parameter[2]
+        MAX = parameter[3]
+        df[output]=[2.5 if MIN < x <= MAX else 1.5 if MIN < x <= FARMIN or MAX < x <=FARMAX else 0 for x in temp]
+    elif inputt in ['hei_refinedgrains']:
+        print('now calculating %s'%output)
+        temp=df[inputt]
+        MIN=parameter[0]
+        MAX=parameter[1]
+        df[output]=[1.5 if MIN < x <= MAX else 0 if x > MAX else 2.5 for x in temp]
     return(df)
 
 def infant_DQI(df, inputt, output, parameter):
@@ -431,9 +423,9 @@ def infant_DQI(df, inputt, output, parameter):
 
 def DQI_BF(df, output, age_group):
     if age_group == 'infant':
-        df[output]=[15 if row['four_month_ratio'] == 'exclusively_breastfed' else 5 if row['four_month_ratio'] == 'exclusively_formula' else 10 for index, row in df.iterrows()]
+        df[output]=[15 if row['child_feeding_practice-breastfed'] == 'yes' and row['child_feeding_practice-any_formula'] != 'yes' else 10 if row['child_feeding_practice-breastfed'] == 'yes' and row['child_feeding_practice-any_formula'] == 'yes'else 5 if row['child_feeding_practice-breastfed'] == 'no' else 'NA' for index, row in df.iterrows()]
     else:
-        df[output]=[10 if row['age_stop_dropdown'] == 0 and row['breastfed'] == 1 else 0 for index, row in df.iterrows()]
+        df[output]=[10 if row['child_feeding_practice-age_stop_dropdown'] != 'yes' and row['child_feeding_practice-breastfed'] == 'yes' else 0 for index, row in df.iterrows()]
 
 
 # https://epi.grants.cancer.gov/hei/developing.html#2010
@@ -500,6 +492,7 @@ def check(dic, data, name, option, arglist):
                     DQI(df,key, values['name'], values['parameters'])
                     df['HEI2015_TOTAL_SCORE']=df[df.columns.intersection(toSum)].sum(axis=1)
                     concat_filepath = os.path.join(arglist['SAVE'],'%s_%s_HEI.csv'%(option, name))
+                    df=df.drop_duplicates(subset=['Visit_label', 'Participant ID','Date of Intake','Date_taken'], keep='first')
                     df.to_csv(concat_filepath, index=False, sep=",", header=True)
                 else:
                     toSum=['HEIX0_BREASTFEEDING','HEIX1_VEGETABLES','HEIX2_TOTALFRUIT'  ,
@@ -508,4 +501,5 @@ def check(dic, data, name, option, arglist):
                     infant_DQI(df,key, values['name'], values['parameters'])
                     df['HEI2015_TOTAL_SCORE']=df[df.columns.intersection(toSum)].sum(axis=1)
                     concat_filepath = os.path.join(arglist['SAVE'],'%s_%s_HEI.csv'%(option, name))
+                    df=df.drop_duplicates(subset=['Visit_label', 'Participant ID','Date of Intake','Date_taken'], keep='first')
                     df.to_csv(concat_filepath, index=False, sep=",", header=True)
