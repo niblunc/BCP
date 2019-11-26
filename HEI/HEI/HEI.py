@@ -233,7 +233,7 @@ def make_components(hei_dict, complete_df):
             complete_df[key] = complete_df[x].astype('float')
         if key in ['hei_dairy']:
             # these are in cups
-            x=value[:-1]
+            x=value
             tmp= complete_df[x].astype('float').sum(axis=1)
             y=value[-1]
             if y == 'DOT0100':
@@ -243,7 +243,7 @@ def make_components(hei_dict, complete_df):
                 print('NO DAIRY MISSING DOT0100, needs to be last in list')
         if key in ['hei_totproteins']:
             # these are in oz
-            x=value[:-1]
+            x=value
             tmp= complete_df[x].astype('float').sum(axis=1)
             y=value[-1]
             if y == 'VEG0700':
@@ -253,7 +253,7 @@ def make_components(hei_dict, complete_df):
                 print('NO TOTAL PROTEIN MISSING VEG0700, needs to be last in list')
         if key in ['hei_seafoodplantprot']:
             # these are in oz
-            x=value[:-1]
+            x=value
             tmp= complete_df[x].astype('float').sum(axis=1)
             y=value[-1]
             if y == 'VEG0700':

@@ -274,6 +274,8 @@ def main(arglist):
         x=HEI.file_org(infile, arglist, important)
         for key,value in x.items():
             y=HEI.make_components(hei_dict, value)
+            test=['hei_totveg','hei_greensbeans','hei_totfruit','hei_wholefruit','hei_wholegrains','hei_dairy','hei_totproteins','hei_seafoodplantprot','hei_refinedgrains','hei_addedsugars','hei_sodium']
+            y=y[(y[test] > 0).all(1)]
             z=HEI.grouper(y, interest, arglist)
             for k, item in z.items():
                 HEI.check(para_dict, item, k, key, arglist)
@@ -313,8 +315,8 @@ if __name__ == "__main__":
     parser.add_argument('-child',dest='CHILD', action='store',
                         default=False, help='Is this pediatric data? If True, then you need the following other files in xtra: demographics (with birthday) and then infant feeding data')
     # Need to change this! New outline#####################################################################################
-    # parser.add_argument('-xtra', dest='XTRA', nargs='+',
-    #                     default=False, help='FIRST demographics (with birthday) and SECOND infant feeding data')
+    parser.add_argument('-xtra', dest='XTRA', nargs='+',
+                        default=False, help='demographics and feeding behaviors')
     ########################################################################################################################
     parser.add_argument('-save',dest='SAVE', action='store',
                         default=False, help='Path to save output, if not filled in will default to the basepath')
