@@ -58,18 +58,11 @@ def samesies(demo_df, infant_df):
 #     demo_dict = {str(k):v for k,v in demo_dict.items()}
 #     alldiet_dict=diet_df.to_dict('index')
 #     return(infant_dict, demo_dict, alldiet_dict)
-def ager(x):
+def ager(date1,date2):
     # Get the age in months of each recall
-    x['DoB'] = pd.to_datetime(x['DoB'])
-    x['Date of Intake'] = pd.to_datetime(x['Date of Intake'])
-    x['Date_taken'] = pd.to_datetime(x['Date_taken'])
-
-    x['Age_at_Date_of_Intake'] = x['Date of Intake'] - x['DoB']
-    x['Age_at_Date_of_Anthros'] = x['Date_taken'] - x['DoB']
-
-    x['Age_at_Date_of_Intake']= x['Age_at_Date_of_Intake']/ np.timedelta64(1, 'M')
-    x['Age_at_Date_of_Anthros']= x['Age_at_Date_of_Anthros']/ np.timedelta64(1, 'M')
-    return(x)
+    diff_time = pd.to_datetime(date1)-pd.to_datetime(date2)
+    diff_time= diff_time/ np.timedelta64(1, 'M')
+    return(diff_time)
 
 def BCPconcat(data):
     columns = list(data[1]['demo'].keys())
@@ -93,20 +86,25 @@ def total_child_df(DATA_dict, arglist):
     DF.to_csv(concat_filepath, index=True, sep=",", header=True)
     return(DF)
 
-def BCP(diet_df, arglist):
-    diet_df=df
-    demo_df = path_finder(arglist)
-    y='Participant ID'
-    diet_df[y]=diet_df[y].convert_objects(convert_numeric=True)
-    demo_df[y]=demo_df[y].convert_objects(convert_numeric=True)
-    unique1 = list(set(demo_df[y])-set(diet_df[y]))
-    print(unique1)
-    unique2 = list(set(diet_df[y])-set(demo_df[y]))
-    print(unique2)
-    all_data=demo_df.merge(diet_df, on=[y])
-    all_data=ager(all_data)
-    all_data['Identifiers_visit']=all_data.Identifiers.str.split('x').str[-1].str.split('m').str[0]
+def BCP(df, arglist):
 
+    demo_df = path_finder(arglist)
+
+    df['PID']=df['Participant ID'].astype('int32')
+    df['Date of Intake']=pd.to_datetime(df['Date of Intake'])
+    df['DoB']=pd.to_datetime(df['DoB'])
+    diet_df=df
+
+    demo_df['PID']=demo_df['Participant ID'].astype('int32')
+    demo_df['DoB']=pd.to_datetime(demo_df['DoB'])
+    demo_df['Date_taken']=pd.to_datetime(demo_df['Date_taken'])
+    demo_df['Age_taken']=ager(demo_df['Date_taken'],demo_df['DoB'])
+
+
+    all_data=pd.merge(diet_df, demo_df, on=['PID','DoB'])
+
+    all_data['Identifiers_visit']=all_data['Identifiers_visit'].astype('int32')
+    all_data['child_feeding_practice-breastfed']=all_data['child_feeding_practice-breastfed'].astype('category')
     return(all_data)
 ############ end BCP specific #########
 
@@ -126,99 +124,89 @@ def T2oz(T):
 ####################
 
 def splitter(DF):
-    DF_child=DF.query('Age_at_Date_of_Intake >= 12 & Identifiers_visit >= 12 & Age_at_Date_of_Anthros >= 12')
-    DF_young=DF.query('Age_at_Date_of_Intake < 12 and Age_at_Date_of_Intake >= 8 & Identifiers_visit < 12 and Identifiers_visit >= 8 & Age_at_Date_of_Anthros < 12 and Age_at_Date_of_Anthros >= 8')
-    DF_infant=DF.query('Age_at_Date_of_Intake < 8 & Identifiers_visit < 8 & Age_at_Date_of_Anthros < 8')
+    DF_child=DF.query('Age_taken >= 12 & Age_at_Intake >= 12 & Identifiers_visit >= 12')
+
+    DF_young=DF.query('Age_taken < 12 & Age_at_Intake < 12 & Identifiers_visit< 12 and Age_taken >= 8 & Age_at_Intake >= 8 & Identifiers_visit >= 8')
+
+    DF_infant=DF.query('Age_taken < 8 & Age_at_Intake < 8 & Identifiers_visit < 8')
     df={'DF_child':DF_child, 'DF_young':DF_young, 'DF_infant':DF_infant}
     return(df)
 
-# def file_org(infile, arglist, important):
-#     if arglist['OPTS'] == False:
-#         arglist['OPTS']=[arglist['NAMES']]
-#         file_dict = {"set_04": {"%s"%arglist['NAMES']:{}}, "set_09": {"%s"%arglist['NAMES']: {}}}
-#         file_dict['set_04']["%s"%arglist['NAMES']]["files"] = [x for x in glob.glob(os.path.join(infile,'*04.txt')) if "%s"%arglist['NAMES'] in x]
-#         file_dict['set_09']["%s"%arglist['NAMES']]["files"] = [x for x in glob.glob(os.path.join(infile,'*09.txt')) if "%s"%arglist['NAMES'] in x]
-#         arglist['OPTS']=[arglist['NAMES']]
-#
-#     else:
-#         file_dict={"set_04":{},"set_09":{}}
-#         for item in arglist['OPTS']:
-#             print('this is the item %s'%item)
-#             file_dict["set_04"][item]= {}
-#             file_dict["set_09"][item]= {}
-#
-#         for key,value in file_dict.items():
-#             keys=list(file_dict[key].keys())
-#             for k in keys:
-#                 print(k)
-#                 file_dict['set_04']["%s"%k]["files"] = [x for x in glob.glob(os.path.join(infile,'*04.txt')) if '%s'%k in x]
-#                 file_dict['set_09']["%s"%k]["files"] = [x for x in glob.glob(os.path.join(infile,'*09.txt')) if '%s'%k in x]
-#
-#     return_dict={}
-#     for ki in arglist['OPTS']:
-#         temp_list = []
-#         print(ki)
-#         for file in file_dict["set_04"]["%s"%ki]["files"]:
-#             temp_df =  pd.read_csv(file, sep="\t", encoding='latin1')
-#             temp_df=temp_df.drop([0])
-#             for val in temp_df["Participant ID"]:
-#                 _id = str(val).lstrip("0").split("_")[0]
-#                 temp_df.replace(val, _id, inplace=True)
-#             temp_list.append(temp_df)
-#         dfm4_original = pd.concat(temp_list, ignore_index=True)
-#         print("Final dataframe size: ", dfm4_original.shape)
-#         dfm4_original = dfm4_original.sort_values(by="Participant ID")
-#
-#         for col in dfm4_original:
-#             if dfm4_original[col].dtype == np.object_:
-#                 dfm4_original[col] = (dfm4_original[col].replace(',','.', regex=True))
-#
-#         temp_list = []
-#         for file in file_dict["set_09"]["%s"%ki]["files"]:
-#             temp_df = pd.read_csv(file,encoding='latin1', sep="\t")
-#             temp_df=temp_df.drop([0])
-#             for val in temp_df["Participant ID"]:
-#                 _id = str(val).strip("0").strip(".").split("_")[0]
-#                 temp_df.replace(val, _id, inplace=True)
-#             temp_list.append(temp_df)
-#         dfm9_original = pd.concat(temp_list, ignore_index=True)
-#         dfm9_original = dfm9_original.sort_values(by="Participant ID")
-#
-#         concat_filepath = os.path.join(arglist['SAVE'],'%s_dataset4.csv'%(ki))
-#         dfm4_original.to_csv(concat_filepath, index=False, sep=",", header=True)
-#
-#         concat_filepath = os.path.join(arglist['SAVE'],'%s_dataset9.csv'%(ki))
-#         dfm9_original.to_csv(concat_filepath, index=False, sep=",", header=True)
-#
-#         b=list(dfm9_original['Participant ID'])
-#         a=list(dfm4_original['Participant ID'])
-#
-#         common=list(set(a) & set(b))
-#         missmatch = list(set(a)-set(b))
-#
-#         common4=dfm4_original[dfm4_original['Participant ID'].isin(common)]
-#         common9=dfm9_original[dfm9_original['Participant ID'].isin(common)]
-#
-#         mm4=dfm4_original[dfm4_original['Participant ID'].isin(missmatch)]
-#         mm9=dfm9_original[dfm9_original['Participant ID'].isin(missmatch)]
-#
-#         total_df = common4.merge(common9.drop_duplicates(subset=['Project Abbreviation','Date of Intake']), how='left')
-#         total_df=total_df.dropna(axis=1, how='all')
-#         complete=total_df[total_df.columns.intersection(important)].dropna()
-#         cind=list(complete.index)
-#         complete_df=total_df[total_df.index.isin(cind)]
-#
-#         missing_df=total_df[~total_df.index.isin(cind)]
-#         missing_df=missing_df.append(mm4)
-#         missing_df=missing_df.append(mm9)
-#
-#         concat_filepath = os.path.join(arglist['SAVE'],'%s_BCP_datasetTOTAL.csv'%(ki))
-#         complete_df.to_csv(concat_filepath, index=False, sep=",", header=True)
-#
-#         missing_filepath = os.path.join(arglist['SAVE'],'%s_BCP_datasetMissing.csv'%(ki))
-#         missing_df.to_csv(missing_filepath, index=False, sep=",", header=True)
-#         return_dict[ki]=complete_df
-#     return(return_dict)
+def file_org(infile, arglist, important):
+    # will create a dictionary with the file paths to all the data
+    if arglist['OPTS'] == False:
+        arglist['OPTS']=[arglist['NAMES']]
+        file_dict = {"set_04": {"%s"%arglist['NAMES']:{}}, "set_09": {"%s"%arglist['NAMES']: {}}}
+        file_dict['set_04']["%s"%arglist['NAMES']]["files"] = [x for x in glob.glob(os.path.join(infile,'*04.txt')) if "%s"%arglist['NAMES'] in x]
+        file_dict['set_09']["%s"%arglist['NAMES']]["files"] = [x for x in glob.glob(os.path.join(infile,'*09.txt')) if "%s"%arglist['NAMES'] in x]
+        arglist['OPTS']=[arglist['NAMES']]
+
+    else:
+        file_dict={"set_04":{},"set_09":{}}
+        for item in arglist['OPTS']:
+            print('this is the item %s'%item)
+            file_dict["set_04"][item]= {}
+            file_dict["set_09"][item]= {}
+
+        for key,value in file_dict.items():
+            keys=list(file_dict[key].keys())
+            for k in keys:
+                print(k)
+                file_dict['set_04']["%s"%k]["files"] = [x for x in glob.glob(os.path.join(infile,'*04.txt')) if '%s'%k in x]
+                file_dict['set_09']["%s"%k]["files"] = [x for x in glob.glob(os.path.join(infile,'*09.txt')) if '%s'%k in x]
+
+    return(file_dict)
+
+def file_reader(arglist, file_dict):
+    for ki in arglist['OPTS']:
+        temp_list = []
+        print(ki)
+        for file in file_dict["set_04"]["%s"%ki]["files"]:
+            temp_df =  pd.read_csv(file, sep="\t", encoding='latin1')
+            temp_df=temp_df.drop([0])
+            for val in temp_df["Participant ID"]:
+                _id = str(val).lstrip("0").split("_")[0]
+                temp_df.replace(val, _id, inplace=True)
+            temp_list.append(temp_df)
+        dfm4_original = pd.concat(temp_list, ignore_index=True)
+        print("Final dataframe size: ", dfm4_original.shape)
+        dfm4_original = dfm4_original.sort_values(by="Participant ID")
+
+        for col in dfm4_original:
+            if dfm4_original[col].dtype == np.object_:
+                dfm4_original[col] = (dfm4_original[col].replace(',','.', regex=True))
+
+        temp_list = []
+        for file in file_dict["set_09"]["%s"%ki]["files"]:
+            temp_df = pd.read_csv(file,encoding='latin1', sep="\t")
+            temp_df=temp_df.drop([0])
+            for val in temp_df["Participant ID"]:
+                _id = str(val).strip("0").strip(".").split("_")[0]
+                temp_df.replace(val, _id, inplace=True)
+            temp_list.append(temp_df)
+        dfm9_original = pd.concat(temp_list, ignore_index=True)
+        dfm9_original = dfm9_original.sort_values(by="Participant ID")
+
+        concat_filepath = os.path.join(arglist['SAVE'],'%s_dataset4.csv'%(ki))
+        dfm4_original.to_csv(concat_filepath, index=False, sep=",", header=True)
+
+        concat_filepath = os.path.join(arglist['SAVE'],'%s_dataset9.csv'%(ki))
+        dfm9_original.to_csv(concat_filepath, index=False, sep=",", header=True)
+    return(dfm9_original, dfm4_original)
+
+def diet_maker(dfm9_original,dfm4_original, ki):
+    mer = pd.merge(b,c, on=['Participant ID','Date of Intake','Project Abbreviation'])
+    mer.drop_duplicates(subset=['Participant ID', 'Date of Intake'], inplace=True)
+
+    total_df=mer.dropna(axis=1, how='all')
+    complete_df=total_df[total_df.columns.intersection(important)].dropna()
+
+    concat_filepath = os.path.join(arglist['SAVE'],'%s_BCP_datasetTOTAL.csv'%(ki))
+    total_df.to_csv(concat_filepath, index=False, sep=",", header=True)
+
+    concat_filepath = os.path.join(arglist['SAVE'],'%s_BCP_datasetINTEREST.csv'%(ki))
+    complete_df.to_csv(concat_filepath, index=False, sep=",", header=True)
+    return(complete_df)
 
 
 def make_components(hei_dict, complete_df):
@@ -287,15 +275,18 @@ def to_ounce(key, x, data):
     data[key] = data[x].astype('float').sum(axis=1)
     data[key] = cup2oz(data[key]/2)
     return(data[key])
-# complete_df[key]=cow_stuff(key, value, complete_df)
+
 def cow_stuff(key, value, data):
     x=value[:-1]
-    tmp= data[x].astype('float').sum(axis=1)
+    tmp= data[x].astype('float32').sum(axis=1)
     y=value[-1]
     if key == 'hei_dairy':
         if y == 'DOT0100':
             tmp2=data[y].astype('float32')/3
-            data[key]=cup2oz(tmp+tmp2)
+            print(tmp2.head())
+            print(tmp.dtype)
+            tmp3=tmp+tmp2
+            data[key]=HEI.cup2oz(tmp3)
         else:
             print('NO DAIRY MISSING DOT0100, needs to be last in list')
     if key == 'hei_totproteins':
@@ -312,6 +303,7 @@ def cow_stuff(key, value, data):
             print('NO SEAFOOD AND PLANT PROTEIN MISSING VEG0700, needs to be last in list')
     return(data[key])
 
+
 def grammar(key,x,num, data):
     data[key] = gram2oz(num*(data[x].astype('float').sum(axis=1)))
     return(data[key])
@@ -320,34 +312,33 @@ def from_cup(key,x,num, data):
     data[key] = cup2oz(num*(data[x].astype('float').sum(axis=1)))
     return(data[key])
 
-def make_ped_components(hei_ped_dict, complete_df, conv_dict):
-    for key, value in hei_ped_dict.items():
-        print(key)
-        if key in ['hei_fruitjuice', 'hei_SSB','formula_foz']:
-            complete_df[key]=to_fluid(key, value, conv_dict[key], complete_df)
-        if key in ['hei_totveg','hei_greensbeans', 'hei_wholefruit','hei_totfruit']:
-            complete_df[key]=to_ounce(key, value, complete_df)
-        if key in ['cereal_oz', 'bbcereal_hcup']:
-            if key == 'bbcereal_hcup':
-                from_cup(key,value, conv_dict[key] , complete_df)
-            else:
-                x=value
-                complete_df[key]= complete_df[x].astype('float').sum(axis=1)
-        if key in ['hei_wholegrains','hei_refinedgrains']:
-            complete_df[key] = complete_df[value].astype('float')
-        if key in ['hei_dairy','hei_totproteins','hei_seafoodplantprot']:
-            complete_df[key]=cow_stuff(key, value, complete_df)
-        if key in ['chocolate_candies', 'candies', 'frosting', 'sugar','nondairy_treat','baked_good', 'fries']:
-            complete_df[key]=grammar(key, value, conv_dict[key], complete_df)
-        if key in ['sweet_sauce']:
-            x=value
-            complete_df[key]= T2oz(complete_df[x].astype('float').sum(axis=1))
-        if key in ['syrups','Pudding','icecream']:
-            from_cup(key, value, conv_dict[key], complete_df)
-        if key in ['chips','other_fried']:
-            x=value
-            complete_df[key]= complete_df[x].astype('float').sum(axis=1)
-    return(complete_df)
+def cow_stuff(key, value, data):
+    x=value[:-1]
+    tmp= data[x].astype('float32').sum(axis=1)
+    y=value[-1]
+    if key == 'hei_dairy':
+        if y == 'DOT0100':
+            tmp2=data[y].astype('float32')/3
+            print(tmp2.head())
+            print(tmp.dtype)
+            tmp3=tmp+tmp2
+            data[key]=HEI.cup2oz(tmp3)
+        else:
+            print('NO DAIRY MISSING DOT0100, needs to be last in list')
+    if key == 'hei_totproteins':
+        if y == 'VEG0700':
+            tmp2=data[y].astype('float32')*2 # this is normally 1/2
+            data[key]=tmp+tmp2
+        else:
+            print('NO TOTAL PROTEIN MISSING VEG0700, needs to be last in list')
+    if key == 'hei_seafoodplantprot':
+        if y == 'VEG0700':
+            tmp2=data[y].astype('float32')*2
+            data[key]=tmp+tmp2
+        else:
+            print('NO SEAFOOD AND PLANT PROTEIN MISSING VEG0700, needs to be last in list')
+    return(data[key])
+
 ###############################################################################
 ###############################################################################
 
@@ -493,7 +484,7 @@ def check(dic, data, name, option, arglist):
                     DQI(df,key, values['name'], values['parameters'])
                     df['HEI2015_TOTAL_SCORE']=df[df.columns.intersection(toSum)].sum(axis=1)
                     concat_filepath = os.path.join(arglist['SAVE'],'%s_%s_HEI.csv'%(option, name))
-                    df=df.drop_duplicates(subset=['Visit_label', 'Participant ID','Date of Intake','Date_taken'], keep='first')
+                    df=df.drop_duplicates(subset=['Participant ID_x', 'Date of Intake', 'Identifiers'])
                     df.to_csv(concat_filepath, index=False, sep=",", header=True)
                 else:
                     toSum=['HEIX0_BREASTFEEDING','HEIX1_VEGETABLES','HEIX2_TOTALFRUIT'  ,
@@ -502,5 +493,6 @@ def check(dic, data, name, option, arglist):
                     infant_DQI(df,key, values['name'], values['parameters'])
                     df['HEI2015_TOTAL_SCORE']=df[df.columns.intersection(toSum)].sum(axis=1)
                     concat_filepath = os.path.join(arglist['SAVE'],'%s_%s_HEI.csv'%(option, name))
-                    df=df.drop_duplicates(subset=['Visit_label', 'Participant ID','Date of Intake','Date_taken'], keep='first')
+                    df=df.drop_duplicates(subset=['Participant ID_x', 'Date of Intake', 'Identifiers'])
+                    print(df['Age_at_Intake'])
                     df.to_csv(concat_filepath, index=False, sep=",", header=True)

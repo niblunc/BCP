@@ -254,7 +254,7 @@ def main(arglist):
 
  # Find the data
 
-    for (dirpath, dirnames, filenames) in os.walk(arglist['BASEPATH']):
+    for (dirpath, dirnames, filenames) in os.walk(basepath):
         for filename in filenames:
             if filename.endswith('.zip'):
                 tmppath=os.sep.join([dirpath, filename])
@@ -265,10 +265,10 @@ def main(arglist):
                    for fileName in listOfFileNames:
                        # Check filename endswith txt
                         if fileName.endswith('04.txt'):
-                            zipObj.extract(fileName, os.path.join(arglist['BASEPATH'],'temp_txt'))
+                            zipObj.extract(fileName, os.path.join(basepath,'temp_txt'))
                         if fileName.endswith('09.txt'):
-                            zipObj.extract(fileName, os.path.join(arglist['BASEPATH'],'temp_txt'))
-    infile = os.path.join(arglist['BASEPATH'],'temp_txt')
+                            zipObj.extract(fileName, os.path.join(basepath,'temp_txt'))
+    infile = os.path.join(basepath,'temp_txt')
 
     if arglist['CHILD'] == False:
         x=HEI.file_org(infile, arglist, important)
