@@ -14,6 +14,7 @@ from zipfile import ZipFile
 import argparse
 import pdb
 import HEI
+import DQI
 import sys
 
 def main(arglist):
@@ -282,24 +283,24 @@ def main(arglist):
     else:
         a=HEI.file_org(infile, arglist, important) # still works
         df=a[arglist['OPTS'][0]] # still works
-        x=HEI.BCP(df, arglist) # depends on XTRA, breaking, changed see the notebook
+        x=DQI.BCP(df, arglist) # depends on XTRA, breaking, changed see the notebook
         print('starting to generate components')
-        y=HEI.make_ped_components(hei_ped_dict, x, conv_dict) # this is good
+        y=DQI.make_ped_components(hei_ped_dict, x, conv_dict) # this is good
         print('starting to generate hei groups')
-        que=HEI.make_hei(y, make_hei_dict)
+        que=DQI.make_hei(y, make_hei_dict)
         z=HEI.grouper(que, ped_interest, arglist)
         key='child'
-        df=HEI.splitter(z['hei0409'])
+        df=DQI.splitter(z['hei0409'])
         for key, value in df.items():
             if key == 'DF_child':
                 HEI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'child')
-                HEI.check(ped_dict['child'], value, 'child', key, arglist)
+                DQI.check(ped_dict['child'], value, 'child', key, arglist)
             elif key == 'DF_young':
-                HEI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'young')
-                HEI.check(ped_dict['young'], value, 'young', key, arglist)
+                DQI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'young')
+                DQI.check(ped_dict['young'], value, 'young', key, arglist)
             else:
-                HEI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'infant')
-                HEI.check(ped_dict['infant'], value, 'infant', key, arglist)
+                DQI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'infant')
+                DQI.check(ped_dict['infant'], value, 'infant', key, arglist)
 
 
 if __name__ == "__main__":
