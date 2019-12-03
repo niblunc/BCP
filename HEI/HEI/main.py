@@ -281,19 +281,22 @@ def main(arglist):
             for k, item in z.items():
                 HEI.check(para_dict, item, k, key, arglist)
     else:
-        a=HEI.file_org(infile, arglist, important) # still works
-        df=a[arglist['OPTS'][0]] # still works
-        x=DQI.BCP(df, arglist) # depends on XTRA, breaking, changed see the notebook
-        print('starting to generate components')
-        y=DQI.make_ped_components(hei_ped_dict, x, conv_dict) # this is good
-        print('starting to generate hei groups')
-        que=DQI.make_hei(y, make_hei_dict)
-        z=HEI.grouper(que, ped_interest, arglist)
-        key='child'
-        df=DQI.splitter(z['hei0409'])
-        for key, value in df.items():
+        a=HEI.file_org(infile, arglist, important)
+        df0=a[arglist['OPTS'][0]]
+        b,c=HEI.file_reader(arglist, df0)
+        e = HEI.diet_maker(b,c, arglist['NAMES'])
+        df_demo=pd.read_csv(os.path.join(basepath,arglist['XTRA']), sep=",")
+        e['Participant ID'] = e['Participant ID'].astype('int32')
+        df_demo['Participant ID'] = df_demo['Participant ID'].astype('int32')
+        df = pd.merge(e,df_demo, on=['Participant ID'])
+        df['Age_at_Intake']=DQI.ager(df['Date of Intake'], df['DoB'])
+        x=DQI.BCP(df, arglist)
+        y=DQI.make_ped_components(hei_ped_dict, x, conv_dict)
+        que=HEI.make_hei(y, make_hei_dict)
+        split_dict=DQI.splitter(que)
+        for key, value in split_dict.items():
             if key == 'DF_child':
-                HEI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'child')
+                DQI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'child')
                 DQI.check(ped_dict['child'], value, 'child', key, arglist)
             elif key == 'DF_young':
                 DQI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'young')
@@ -301,6 +304,7 @@ def main(arglist):
             else:
                 DQI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'infant')
                 DQI.check(ped_dict['infant'], value, 'infant', key, arglist)
+
 
 
 if __name__ == "__main__":
