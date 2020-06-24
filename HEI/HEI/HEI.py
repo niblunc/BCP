@@ -45,42 +45,37 @@ def file_org(infile, arglist, important):
 
     return(file_dict)
 
-def file_reader(arglist, file_dict):
-    for ki in arglist['OPTS']:
-        temp_list = []
-        print(ki)
-        for file in file_dict["set_04"]["%s"%ki]["files"]:
-            temp_df =  pd.read_csv(file, sep="\t", encoding='latin1')
-            temp_df=temp_df.drop([0])
-            for val in temp_df["Participant ID"]:
-                _id = str(val).lstrip("0").split("_")[0]
-                temp_df.replace(val, _id, inplace=True)
-            temp_list.append(temp_df)
-        dfm4_original = pd.concat(temp_list, ignore_index=True)
-        print("Final dataframe size: ", dfm4_original.shape)
-        dfm4_original = dfm4_original.sort_values(by="Participant ID")
+def file_reader(file_dict):
+    data_dict={"set_04":{},"set_09":{}}
 
-        for col in dfm4_original:
-            if dfm4_original[col].dtype == np.object_:
-                dfm4_original[col] = (dfm4_original[col].replace(',','.', regex=True))
+    for key, value in file_dict.items():
+        print(key)
+        for k,v, in value.items():
+            print(k)
+            temp_list = []
+            for file in v["files"]:
+                print(file)
+                temp_df =  pd.read_csv(file, sep="\t", encoding='latin1')
+                temp_df=temp_df.drop([0])
+                for val in temp_df["Participant ID"]:
+                    _id = str(val).lstrip("0").split("_")[0]
+                    temp_df.replace(val, _id, inplace=True)
+                temp_list.append(temp_df)
+            dfm_original = pd.concat(temp_list, ignore_index=True)
+            print("Final dataframe size: ", dfm_original.shape)
+            dfm_original = dfm_original.sort_values(by="Participant ID")
 
-        temp_list = []
-        for file in file_dict["set_09"]["%s"%ki]["files"]:
-            temp_df = pd.read_csv(file,encoding='latin1', sep="\t")
-            temp_df=temp_df.drop([0])
-            for val in temp_df["Participant ID"]:
-                _id = str(val).strip("0").strip(".").split("_")[0]
-                temp_df.replace(val, _id, inplace=True)
-            temp_list.append(temp_df)
-        dfm9_original = pd.concat(temp_list, ignore_index=True)
-        dfm9_original = dfm9_original.sort_values(by="Participant ID")
+            for col in dfm_original:
+                if dfm_original[col].dtype == np.object_:
+                    dfm_original[col] = (dfm4_original[col].replace(',','.', regex=True))
 
-        concat_filepath = os.path.join(arglist['SAVE'],'%s_dataset4.csv'%(ki))
-        dfm4_original.to_csv(concat_filepath, index=False, sep=",", header=True)
+            concat_filepath = os.path.join(arglist['SAVE'],'%s_dataset_%s.csv'%(k,key))
+            dfm_original.to_csv(concat_filepath, index=False, sep=",", header=True)
 
-        concat_filepath = os.path.join(arglist['SAVE'],'%s_dataset9.csv'%(ki))
-        dfm9_original.to_csv(concat_filepath, index=False, sep=",", header=True)
-    return(dfm9_original, dfm4_original)
+            data_dict[key]= dfm_original
+    return(data_dict)
+
+
 
 def diet_maker(dfm9_original,dfm4_original, ki):
     mer = pd.merge(b,c, on=['Participant ID','Date of Intake','Project Abbreviation'])
