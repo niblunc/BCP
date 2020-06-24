@@ -137,7 +137,8 @@ def main(arglist):
           ['Refined Grains (ounce equivalents)'],
           'hei_addedsugars':
           ['Added Sugars (by Total Sugars) (g)'],
-          'ripctsfa': ['% Calories from SFA','Energy (kcal)'],
+          'ripctsfa':
+          ['% Calories from SFA','Energy (kcal)'],
          'energy':
          ['Energy (kcal)'],
          'fats':

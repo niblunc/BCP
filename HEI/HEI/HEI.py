@@ -3,7 +3,6 @@
 """
 Healthy Eating Index and NDSR functions
 This expects a typical zipfile structure from an NDSR download
-Can create pediatric (infant) DQI not validated
 Created on Thu Oct  3 16:23:45 2019
 Built with python 3.6
 @author: gracer
