@@ -209,15 +209,15 @@ def main(arglist):
                            zipObj.extract(fileName, os.path.join(basepath,'temp_txt'))
    infile = os.path.join(basepath,'temp_txt')
 
-   if arglist['CHILD'] == False:
-       x=HEI.file_org(infile, arglist, important)
-       for key,value in x.items():
-           y=HEI.make_components(hei_dict, value)
-           test=['hei_totveg','hei_greensbeans','hei_totfruit','hei_wholefruit','hei_wholegrains','hei_dairy','hei_totproteins','hei_seafoodplantprot','hei_refinedgrains','hei_addedsugars','hei_sodium']
-           y=y[(y[test] > 0).all(1)]
-           z=HEI.grouper(y, interest, arglist)
-           for k, item in z.items():
-               HEI.check(para_dict, item, k, key, arglist)
+   # if arglist['CHILD'] == False:
+   #     x=HEI.file_org(infile, arglist, important)
+   #     for key,value in x.items():
+   #         y=HEI.make_components(hei_dict, value)
+   #         test=['hei_totveg','hei_greensbeans','hei_totfruit','hei_wholefruit','hei_wholegrains','hei_dairy','hei_totproteins','hei_seafoodplantprot','hei_refinedgrains','hei_addedsugars','hei_sodium']
+   #         y=y[(y[test] > 0).all(1)]
+   #         z=HEI.grouper(y, interest, arglist)
+   #         for k, item in z.items():
+   #             HEI.check(para_dict, item, k, key, arglist)
    else:
        a=HEI.file_org(infile, arglist, important)
        df0=a[arglist['OPTS'][0]]
