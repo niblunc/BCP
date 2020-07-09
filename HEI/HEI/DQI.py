@@ -3,7 +3,7 @@
 """
 Dietary Quality Index and NDSR functions
 This expects a typical zipfile structure from an NDSR download
-Created on Thu Oct  3 16:23:45 2019
+Created on Tue Dec  2 11:29:45 2019
 Built with python 3.6
 @author: gracer
 """
@@ -137,8 +137,6 @@ def cow_stuff(key, value, data):
     if key == 'hei_dairy':
         if y == 'DOT0100':
             tmp2=data[y].astype('float32')/3
-            print(tmp2.head())
-            print(tmp.dtype)
             tmp3=tmp+tmp2
             data[key]=HEI.cup2oz(tmp3)
         else:
