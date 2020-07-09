@@ -14,6 +14,7 @@ from zipfile import ZipFile
 import argparse
 import pdb
 import HEI
+import DQI
 import sys
 
 def main(arglist):
@@ -45,7 +46,7 @@ def main(arglist):
            'GRW1100' , 'GRW1200', 'GRW0400' ,'GRS0400' ,'GRR0400','VEG0800','FMC0100', 'FMC0200','DMF0100',
            'DMR0100','DML0100','DMN0100' ,'DMF0200','DMR0200','DML0200','DOT0500', 'DOT0600','DOT0700',
            'DOT0800','GRW0600','GRS0600','GRR0600','GRW0700','GRS0700','GRR0700','GRW1300','GRS1300']
-
+    
     para_dict = {'hei_totveg': {'parameters':[1.1], 'name': 'HEIX1_TOTALVEG'},
              'hei_greensbeans': {'parameters':[0.2], 'name': 'HEIX2_GREEN_AND_BEAN'},
              'hei_totfruit': {'parameters':[0.8], 'name': 'HEIX3_TOTALFRUIT'},
@@ -136,7 +137,8 @@ def main(arglist):
           ['Refined Grains (ounce equivalents)'],
           'hei_addedsugars':
           ['Added Sugars (by Total Sugars) (g)'],
-          'ripctsfa': ['% Calories from SFA','Energy (kcal)'],
+          'ripctsfa':
+          ['% Calories from SFA','Energy (kcal)'],
          'energy':
          ['Energy (kcal)'],
          'fats':
@@ -254,7 +256,7 @@ def main(arglist):
 
  # Find the data
 
-    for (dirpath, dirnames, filenames) in os.walk(arglist['BASEPATH']):
+    for (dirpath, dirnames, filenames) in os.walk(basepath):
         for filename in filenames:
             if filename.endswith('.zip'):
                 tmppath=os.sep.join([dirpath, filename])
@@ -265,39 +267,45 @@ def main(arglist):
                    for fileName in listOfFileNames:
                        # Check filename endswith txt
                         if fileName.endswith('04.txt'):
-                            zipObj.extract(fileName, os.path.join(arglist['BASEPATH'],'temp_txt'))
+                            zipObj.extract(fileName, os.path.join(basepath,'temp_txt'))
                         if fileName.endswith('09.txt'):
-                            zipObj.extract(fileName, os.path.join(arglist['BASEPATH'],'temp_txt'))
-    infile = os.path.join(arglist['BASEPATH'],'temp_txt')
+                            zipObj.extract(fileName, os.path.join(basepath,'temp_txt'))
+    infile = os.path.join(basepath,'temp_txt')
 
     if arglist['CHILD'] == False:
         x=HEI.file_org(infile, arglist, important)
         for key,value in x.items():
             y=HEI.make_components(hei_dict, value)
+            test=['hei_totveg','hei_greensbeans','hei_totfruit','hei_wholefruit','hei_wholegrains','hei_dairy','hei_totproteins','hei_seafoodplantprot','hei_refinedgrains','hei_addedsugars','hei_sodium']
+            y=y[(y[test] > 0).all(1)]
             z=HEI.grouper(y, interest, arglist)
             for k, item in z.items():
                 HEI.check(para_dict, item, k, key, arglist)
     else:
         a=HEI.file_org(infile, arglist, important)
-        df=a[arglist['OPTS'][0]]
-        x=HEI.BCP(df, arglist)
-        print('starting to generate components')
-        y=HEI.make_ped_components(hei_ped_dict, x, conv_dict)
-        print('starting to generate hei groups')
+        df0=a[arglist['OPTS'][0]]
+        b,c=HEI.file_reader(arglist, df0)
+        e = HEI.diet_maker(b,c, arglist['NAMES'])
+        df_demo=pd.read_csv(os.path.join(basepath,arglist['XTRA']), sep=",")
+        e['Participant ID'] = e['Participant ID'].astype('int32')
+        df_demo['Participant ID'] = df_demo['Participant ID'].astype('int32')
+        df = pd.merge(e,df_demo, on=['Participant ID'])
+        df['Age_at_Intake']=DQI.ager(df['Date of Intake'], df['DoB'])
+        x=DQI.BCP(df, arglist)
+        y=DQI.make_ped_components(hei_ped_dict, x, conv_dict)
         que=HEI.make_hei(y, make_hei_dict)
-        z=HEI.grouper(que, ped_interest, arglist)
-        key='child'
-        df=HEI.splitter(z['hei0409'])
-        for key, value in df.items():
+        split_dict=DQI.splitter(que)
+        for key, value in split_dict.items():
             if key == 'DF_child':
-                HEI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'child')
-                HEI.check(ped_dict['child'], value, 'child', key, arglist)
+                DQI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'child')
+                DQI.check(ped_dict['child'], value, 'child', key, arglist)
             elif key == 'DF_young':
-                HEI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'young')
-                HEI.check(ped_dict['young'], value, 'young', key, arglist)
+                DQI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'young')
+                DQI.check(ped_dict['young'], value, 'young', key, arglist)
             else:
-                HEI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'infant')
-                HEI.check(ped_dict['infant'], value, 'infant', key, arglist)
+                DQI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'infant')
+                DQI.check(ped_dict['infant'], value, 'infant', key, arglist)
+
 
 
 if __name__ == "__main__":
@@ -312,8 +320,10 @@ if __name__ == "__main__":
                         default=False, help='Do you have multiple different 04 and 09 files that need to be kept seperate? Please enter strings that can be searched with (this should be in the file path) no commas')
     parser.add_argument('-child',dest='CHILD', action='store',
                         default=False, help='Is this pediatric data? If True, then you need the following other files in xtra: demographics (with birthday) and then infant feeding data')
+    # Need to change this! New outline#####################################################################################
     parser.add_argument('-xtra', dest='XTRA', nargs='+',
-                        default=False, help='FIRST demographics (with birthday) and SECOND infant feeding data')
+                        default=False, help='demographics and feeding behaviors')
+    ########################################################################################################################
     parser.add_argument('-save',dest='SAVE', action='store',
                         default=False, help='Path to save output, if not filled in will default to the basepath')
 
