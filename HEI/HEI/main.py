@@ -46,11 +46,7 @@ def main(arglist):
            'GRW1100' , 'GRW1200', 'GRW0400' ,'GRS0400' ,'GRR0400','VEG0800','FMC0100', 'FMC0200','DMF0100',
            'DMR0100','DML0100','DMN0100' ,'DMF0200','DMR0200','DML0200','DOT0500', 'DOT0600','DOT0700',
            'DOT0800','GRW0600','GRS0600','GRR0600','GRW0700','GRS0700','GRR0700','GRW1300','GRS1300']
-    keep=['Participant ID','Energy (kcal)','Sodium (mg)','Refined Grains (ounce equivalents)',
-           'Added Sugars (by Total Sugars) (g)','% Calories from SFA','Energy (kcal)',
-           'Total Polyunsaturated Fatty Acids (PUFA) (g)','Total Monounsaturated Fatty Acids (MUFA) (g)',
-           'Total Saturated Fatty Acids (SFA) (g)']
-
+    
     para_dict = {'hei_totveg': {'parameters':[1.1], 'name': 'HEIX1_TOTALVEG'},
              'hei_greensbeans': {'parameters':[0.2], 'name': 'HEIX2_GREEN_AND_BEAN'},
              'hei_totfruit': {'parameters':[0.8], 'name': 'HEIX3_TOTALFRUIT'},
