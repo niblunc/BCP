@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+DQI main
 Created on Thu July  9 2020
+Updated on Wed July 15 12:50   2020
 Built with python 3.6
 @author: gracer
 """
@@ -21,6 +23,7 @@ def main(arglist):
     print(arglist)
     print('Using python version:', sys.version[:5])
 
+    demo_interest = ["child_feeding_practice-age_any_formula", "child_feeding_practice-age_any_formula_status", "child_feeding_practice-age_fed", "child_feeding_practice-age_fed_dropdown",	"child_feeding_practice-age_fed_status", "child_feeding_practice-age_regular_formula",	"child_feeding_practice-age_regular_formula_status", "child_feeding_practice-age_stop", "child_feeding_practice-age_stop_dropdown", "child_feeding_practice-age_stop_formula", "child_feeding_practice-age_stop_formula_dropdown","child_feeding_practice-age_stop_formula_status","child_feeding_practice-age_stop_status","child_feeding_practice-any_formula",	"child_feeding_practice-birth_order",	"child_feeding_practice-breastfed",	"child_feeding_practice-four_month_ratio",	"child_feeding_practice-regular_formula", "Identifiers_visit", "CandID", "Visit_label","Data_entry_completion_status","Date_taken","weight","head_circumference","height",	"Participant ID","Gender","DoB"]
 #    Dictionaries and lists
     important=['Participant ID','VEG0100','VEG0200','VEG0300','VEG0400','VEG0800','VEG0450','VEG0700',
            'VEG0600','VEG0900','VEG0500','VEG0100','VEG0700','FRU0100','FRU0200','FRU0300','FRU0400',
@@ -209,45 +212,36 @@ def main(arglist):
                            zipObj.extract(fileName, os.path.join(basepath,'temp_txt'))
    infile = os.path.join(basepath,'temp_txt')
 
-   # if arglist['CHILD'] == False:
-   #     x=HEI.file_org(infile, arglist, important)
-   #     for key,value in x.items():
-   #         y=HEI.make_components(hei_dict, value)
-   #         test=['hei_totveg','hei_greensbeans','hei_totfruit','hei_wholefruit','hei_wholegrains','hei_dairy','hei_totproteins','hei_seafoodplantprot','hei_refinedgrains','hei_addedsugars','hei_sodium']
-   #         y=y[(y[test] > 0).all(1)]
-   #         z=HEI.grouper(y, interest, arglist)
-   #         for k, item in z.items():
-   #             HEI.check(para_dict, item, k, key, arglist)
-   else:
-       a=HEI.file_org(infile, arglist, important)
-       df0=a[arglist['OPTS'][0]]
-       b,c=HEI.file_reader(arglist, df0)
-       e = HEI.diet_maker(b,c, arglist['NAMES'])
-       df_demo=pd.read_csv(os.path.join(basepath,arglist['XTRA']), sep=",")
-       e['Participant ID'] = e['Participant ID'].astype('int32')
-       df_demo['Participant ID'] = df_demo['Participant ID'].astype('int32')
-       df = pd.merge(e,df_demo, on=['Participant ID'])
-       df['Age_at_Intake']=DQI.ager(df['Date of Intake'], df['DoB'])
-       x=DQI.BCP(df, arglist)
-       y=DQI.make_ped_components(hei_ped_dict, x, conv_dict)
-       que=HEI.make_hei(y, make_hei_dict)
-       split_dict=DQI.splitter(que)
-       for key, value in split_dict.items():
-           if key == 'DF_child':
-               DQI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'child')
-               DQI.check(ped_dict['child'], value, 'child', key, arglist)
-           elif key == 'DF_young':
-               DQI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'young')
-               DQI.check(ped_dict['young'], value, 'young', key, arglist)
-           else:
-               DQI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'infant')
-               DQI.check(ped_dict['infant'], value, 'infant', key, arglist)
+
+   file_dict=DQI.file_org(infile, arglist) #read in files
+   # df0=a[arglist['OPTS'][0]]
+   data_dict=DQI.file_reader(basepath, arglist['XTRA'], file_dict, demo_interest)
+   # e = HEI.diet_maker(b,c, arglist['NAMES'])
+   # df_demo=pd.read_csv(os.path.join(basepath,arglist['XTRA']), sep=",")
+   # e['Participant ID'] = e['Participant ID'].astype('int32')
+   # df_demo['Participant ID'] = df_demo['Participant ID'].astype('int32')
+   # df = pd.merge(e,df_demo, on=['Participant ID'])
+   # df['Age_at_Intake']=DQI.ager(df['Date of Intake'], df['DoB'])
+   # x=DQI.BCP(df, arglist)
+   # y=DQI.make_ped_components(hei_ped_dict, x, conv_dict)
+   # que=HEI.make_hei(y, make_hei_dict)
+   # split_dict=DQI.splitter(que)
+   # for key, value in split_dict.items():
+   #     if key == 'DF_child':
+   #         DQI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'child')
+   #         DQI.check(ped_dict['child'], value, 'child', key, arglist)
+   #     elif key == 'DF_young':
+   #         DQI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'young')
+   #         DQI.check(ped_dict['young'], value, 'young', key, arglist)
+   #     else:
+   #         DQI.DQI_BF(value, 'HEIX0_BREASTFEEDING', 'infant')
+   #         DQI.check(ped_dict['infant'], value, 'infant', key, arglist)
 
 
 
 if __name__ == "__main__":
    #commandline parser
-   parser=argparse.ArgumentParser(description='Calculating HEI')
+   parser=argparse.ArgumentParser(description='Calculating DQI')
 
    parser.add_argument('-basepath', dest='BASEPATH', action='store',
                        default=False, help='Where dem files at boo?')
