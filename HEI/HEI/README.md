@@ -24,6 +24,8 @@ This function is taking the dictionary of parameters, the datatables and making 
 from Rios et al. "Development of a Diet Quality Score for Infants and Toddlers and its association with weight"J Nutrit Health Food Sci. 2016 ; 4(4): .
 
 ## Diet Quality Index Scoring for infants 0–5 months
+High Score is 55
+
 | Component  | Scores  |
 |---|---|
 | Milk (type of feeding)  |   |
@@ -51,38 +53,40 @@ from Rios et al. "Development of a Diet Quality Score for Infants and Toddlers a
 The scores were based on the age of introduction of these foods as recommended by the WIC program13, the WHO14 and the American Academy of Pediatrics15, not on portion sizes.
 
 ## Diet Quality Index Scoring for infants 8-24 months
+High Score is 55
+
 | Component  | Score  | 8-11 months  | 12-24 months  |
 |---|---|---|---|
 | Milk  |   |   |   |
 |  Breastfeeding | 10  | Yes  | Yes  |
-| Formula/Cow's milk/non-dairy milks  | 5  | 20-28  | 14-18  |
+| Formula/Cow's milk/non-dairy milks (fl oz/d) | 5  | 20-28  | 14-18  |
 |   | 2.5  | 8.0–19.9 or 28.1–35.0  | 8.0–13.9 or 18.1–24.0  |
 |   | 0  | <8 or >35  | <8.0 or >24.0  |
 | Grains  |   |   |   |
-|  Whole grains  | 2.5  | 1.0–3.5  | 1.5–5.5  |
+|  Whole grains (oz/d) | 2.5  | 1.0–3.5  | 1.5–5.5  |
 |   | 1.25  |  0.1–0.9 or 3.6–8.0 |  0.1–1.4 or 5.6–8.0 |
 |   |  0 | 0 or >8.0  | 0 or >8.0  |
-|  Refined grains | 2.5  |  0–1.5 |  0–1.8 |
+|  Refined grains (oz/d) | 2.5  |  0–1.5 |  0–1.8 |
 |   |  1.25 |  1.6–3.5 |  1.9–4.2 |
 |   | 0  | >3.5  | >4.2  |
-| Proteins  |  5 | 2.5–6.0  |  2.0–3.0 |
+| Proteins (oz/d) |  5 | 2.5–6.0  |  2.0–3.0 |
 |   | 2.5  |  0.1–2.4 or 6.1–10.0 | 0.1–1.9 or 3.1–6.0  |
 |   | 0  | 0 or >10  |  0 or >6.0 |
-| Vegetables | 5  |  ≥2.0  | ≥8.0  |
+| Vegetables (oz/d) | 5  |  ≥2.0  | ≥8.0  |
 |   | 2.5  |  0.1–1.9 | 0.1–7.9  |
 |   |  0 |  0 |  0 |
-| Fruits  | 5  | ≥2.0  | ≥8.0  |
+| Fruits (oz/d) | 5  | ≥2.0  | ≥8.0  |
 |   | 2.5  |  0.1–1.9 | 0.1–7.9  |
 |   | 0  |  0 |  0 |
-| 100% fruit juice  | 5  |  0 |  0-4.0 |
+| 100% fruit juice (fl oz/d) | 5  |  0 |  0-4.0 |
 |   | 2.5  | 0.1–6.0  | 4.1–6.0  |
 |   |  0 | >6.0  | >6.0  |
-| Sugar sweetened beverages  | 5  |  0 | 0  |
+| Sugar sweetened beverages (fl oz/d) | 5  |  0 | 0  |
 |   | 2.5  | 0.1–4.0  | 4.1–6.0  |
 |   |  0 | >6.0  | >6.0  |
-| Sweets  | 5  |  0 |  0 |
+| Sweets servings/d | 5  |  0 |  0 |
 |   | 2.5  |  0.1-1.0 | 0.1-1.0  |
 |   | 0  | >1.0  | >1.0  |
-| Salty snacks  | 5  |  0 | 0  |
+| Salty snacks oz/ds | 5  |  0 | 0  |
 |   | 2.5  |  0.1-1.0 | 0.1-1.0  |
 |   | 0  | >1.0  | >1.0  |
