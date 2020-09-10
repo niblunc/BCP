@@ -4,12 +4,15 @@
 Dietary Quality Index and NDSR functions
 This expects a typical zipfile structure from an NDSR download
 Created on Tue Dec  2 11:29:45 2019
-Updated on Wed July 15 12:50   2020
+Updated on Thurs Sept 3 16:16  2020
 Built with python 3.6
 @author: gracer
 """
-
-
+def ager(date1,date2):
+    # Get the age in months of each recall
+    diff_time = pd.to_datetime(date1)-pd.to_datetime(date2)
+    diff_time= diff_time/ np.timedelta64(1, 'M')
+    return(diff_time)
 
 def file_org(infile, arglist):
     # will create a dictionary with the file paths to all the data
@@ -36,57 +39,81 @@ def file_org(infile, arglist):
 
     return(file_dict)
 
-def file_reader(basepath, arglist['XTRA'], file_dict, demo_interest):
-    data_dict={"set_04":{},"set_09":{},"demo":{}}
-df_demo=pd.read_csv(os.path.join(basepath,arglist['XTRA']), sep=",")
 
-df_demo['Participant ID'] = df_demo['Participant ID'].astype('int32')
-df_demo['Identifiers_visit']=df_demo['Identifiers_visit'].astype('int32')
-df_demo['child_feeding_practice-breastfed']=df_demo['child_feeding_practice-breastfed'].astype('category')
+def cup2oz(cup):
+    cup=cup.astype('float32')
+    oz=cup*8
+    return(oz)
 
-data_dict["demo"]= df_demo[demo_interest]
+def gram2oz(gram):
+    gram=gram.astype('float32')
+    oz=gram/28.3495
+    return(oz)
 
-for key, value in file_dict.items():
-    print(key)
-    for k,v, in value.items():
-        print(k)
-        temp_list = []
-        for file in v["files"]:
-            print(file)
-            temp_df =  pd.read_csv(file, sep="\t", encoding='latin1')
-            if key == 'set_09':
-                temp_df=temp_df.drop([0]) #drops extra row
-            for val in temp_df["Participant ID"]:
-                _id = str(val).lstrip("0").split("_")[0]
-                temp_df.replace(val, _id, inplace=True)
-            temp_list.append(temp_df)
-        dfm_original = pd.concat(temp_list, ignore_index=True)
-        print("Final dataframe size: ", dfm_original.shape)
-        dfm_original = dfm_original.sort_values(by="Participant ID")
+def T2oz(T):
+    T=T.astype('float32')
+    oz=T/2
+    return(oz)
 
-        del_cols=set(dfm_original.columns) - set(important)
-        dfm_original.drop(del_cols, axis=1, inplace=True)
-        for col in dfm_original:
-            if dfm_original[col].dtype == np.object_:
-                dfm_original[col] = (dfm_original[col].replace(',','.', regex=True))
+def egg2oz(egg):
+    egg=egg.astype('float32')
+    oz=egg*1.6 #about a large egg
+    return(oz)
 
-        concat_filepath = os.path.join(arglist['SAVE'],'%s_dataset_%s.csv'%(k,key))
+def serv2oz(serv):
+    serv=serv.astype('float32')
+    return(serv)
 
-        dfm_original['Participant ID'] = dfm_original['Participant ID'].astype('float').astype('int32')
-        _sub=pd.merge(data_dict['demo'][['Participant ID','DoB']], dfm_original[['Participant ID','Date of Intake']],on='Participant ID')
-        _sub['age at intake']=ager(_sub['Date of Intake'], _sub['DoB'])
-        dfm_original=pd.merge(dfm_original,_sub, on=['Participant ID','Date of Intake'])
-        dfm_original = dfm_original.groupby(['Participant ID', 'Date of Intake'])
-#         dfm_original.to_csv(concat_filepath, index=False, sep=",", header=True)
+def HEI_components(dictio, df):
+    for key, value in dictio.items():
+        print(key)
+        if key in ['HEI_TOTALVEG','HEI_TOTALFRUIT']:
+            df.loc[(df[key] >= value['parameters'][0] )& (df[key] <= value['parameters'][1]), value['name']] = 2.5
+            df.loc[(df[key] > value['parameters'][1]), value['name']] = 5
+            df.loc[(df[key] < value['parameters'][0]), value['name']] = 0
+        if key in ['HEI_FRUITJUICE','HEI_SSB','HEI_SWEETS','HEI_SALTY']:
+            df.loc[(df[key] >= value['parameters'][0] )& (df[key] <= value['parameters'][1]), value['name']] = 2.5
+            df.loc[(df[key] > value['parameters'][1]), value['name']] = 0
+            df.loc[(df[key] < value['parameters'][0]), value['name']] = 5
+        if key in ['HEI_REFINEDGRAINS']:
+            df.loc[(df[key] >= value['parameters'][0] )& (df[key] <= value['parameters'][1]), value['name']] = 1.25
+            df.loc[(df[key] > value['parameters'][1]), value['name']] = 0
+            df.loc[(df[key] < value['parameters'][0]), value['name']] = 2.5
+        if key in ['HEI_WHOLEGRAINS','HEI_MILK']:
+            print('low end %f'%value['parameters'][2])
+            print('high end %f'%value['parameters'][3])
+            df.loc[(df[key] >= value['parameters'][0]) & (df[key] <= value['parameters'][1]), value['name']] = 2.5
+            df.loc[(df[key] > value['parameters'][3]) | (df[key] <= value['parameters'][2]) , value['name']] = 0
+            df.loc[(df[key] > value['parameters'][2]) & (df[key] < value['parameters'][0]), value['name']] = 1.25
+            df.loc[(df[key] > value['parameters'][1]) & (df[key] < value['parameters'][3]), value['name']] = 1.25
+        if key in ['HEI_TOTALPROTEINS']:
+            print('low end %f'%value['parameters'][2])
+            print('high end %f'%value['parameters'][3])
+            df.loc[(df[key] >= value['parameters'][0]) & (df[key] <= value['parameters'][1]), value['name']] = 5
+            df.loc[(df[key] > value['parameters'][3]) | (df[key] <= value['parameters'][2]) , value['name']] = 0
+            df.loc[(df[key] > value['parameters'][2]) & (df[key] < value['parameters'][0]), value['name']] = 2.5
+            df.loc[(df[key] > value['parameters'][1]) & (df[key] < value['parameters'][3]), value['name']] = 2.5
+    return(df)
 
-        data_dict[key]= dfm_original
+def anyFORM(df):
+    df.loc[(df['age_regular_formula'].isnull() == True), 'age_formula'] = df['age_any_formula']
+    df.loc[(df['age_regular_formula'].isnull() == False), 'age_formula'] = df['age_regular_formula']
 
+def BF_infant(df):
+    df.loc[(df['breastfed'] == 'yes') & (df['age_stop'] > df['age at intake']) | (df['age_stop'].isnull() == True) & (df['age_formula'] > df['age at intake']) | df['age_formula'].isnull() == True, 'Infant'] = 'EXBF'
+    df.loc[(df['breastfed'] == 'no') & (df['age_stop_formula'] > df['age at intake']), 'Infant'] = 'EXFORM'
+    df.loc[(df['age_stop'] == 0) , 'Infant'] = 'EXFORM'
+    df.loc[(df['breastfed'] == 'yes') & (df['age_formula'] < df['age at intake']), 'Infant'] = 'MIX'
 
-            return(data_dict)
+def BF_young_child(df):
+    df.loc[(df['breastfed'] == 'yes') & (df['age_stop'] >= df['age at intake']), 'child_young'] = 'BF'
+    df.loc[(df['age_stop'] < df['age at intake']) | (df['age_stop'].isnull() == True), 'child_young'] = 'noBF'
 
-
-def ager(date1,date2):
-    # Get the age in months of each recall
-    diff_time = pd.to_datetime(date1)-pd.to_datetime(date2)
-    diff_time= diff_time/ np.timedelta64(1, 'M')
-    return(diff_time)
+def BF_HEI(df, age):
+    if age == 'infant':
+        df.loc[(df['Infant'] == 'EXBF'), 'HEIX0_BF'] = 15
+        df.loc[(df['Infant'] == 'MIX'), 'HEIX0_BF'] = 10
+        df.loc[(df['Infant'] == 'EXFORM'), 'HEIX0_BF'] = 5
+    else:
+        df.loc[(df['child_young'] == 'noBF'), 'HEIX0_BF'] = 0
+        df.loc[(df['child_young'] == 'BF'), 'HEIX0_BF'] = 10
